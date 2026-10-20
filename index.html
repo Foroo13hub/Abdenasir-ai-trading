@@ -101,31 +101,35 @@ function analyzeGold() {
     price < low ||
     price > high
   ) {
-    result.textContent = "تأكد من صحة السعر والقمة والقاع.";
+    result.textContent =
+      "⚠️ تأكد من صحة السعر والقمة والقاع.";
     return;
   }
 
   const midpoint = (high + low) / 2;
-  const risk = Math.abs(price - midpoint);
 
-  if (risk === 0) {
-    result.textContent = "السعر في منتصف النطاق؛ انتظر تأكيد الاتجاه.";
+  if (price === midpoint) {
+    result.textContent =
+      "⏳ السعر في منتصف النطاق. انتظر تأكيد الاتجاه.";
     return;
   }
 
   let direction;
   let stop;
+  let risk;
   let target1;
   let target2;
 
   if (price > midpoint) {
     direction = "صاعد مبدئياً 📈";
-    stop = midpoint;
+    stop = low;
+    risk = price - stop;
     target1 = price + risk * 2;
     target2 = price + risk * 3;
   } else {
     direction = "هابط مبدئياً 📉";
-    stop = midpoint;
+    stop = high;
+    risk = stop - price;
     target1 = price - risk * 2;
     target2 = price - risk * 3;
   }
@@ -133,11 +137,12 @@ function analyzeGold() {
   result.innerHTML =
     "<br>الاتجاه المبدئي: " + direction +
     "<br>السعر الحالي: " + price.toFixed(2) +
-    "<br>منطقة الدخول المحتملة: " + price.toFixed(2) +
+    "<br>منتصف النطاق: " + midpoint.toFixed(2) +
+    "<br>منطقة الدخول المرجعية: " + price.toFixed(2) +
     "<br>وقف الخسارة: " + stop.toFixed(2) +
     "<br>الهدف الأول (2R): " + target1.toFixed(2) +
     "<br>الهدف الثاني (3R): " + target2.toFixed(2) +
-    "<br><br>تنبيه: هذا حساب تعليمي مبسط، وليس إشارة تداول مؤكدة.";
+    "<br><br>⚠️ تحليل تعليمي يعتمد على النطاق المدخل، وليس إشارة تداول مؤكدة.";
 }
   function calculateRisk() {
   const balance = Number(document.getElementById('balance').value);
