@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Abdenasir AI Trading</title>
+<script src="https://unpkg.com/lightweight-charts@4.2.2/dist/lightweight-charts.standalone.production.js"></script>
+<style>
+:root{--bg:#090d12;--panel:#111923;--panel2:#0d141c;--line:#24313d;--text:#e8eef5;--muted:#91a2b4;--green:#25d695;--red:#ff657a;--gold:#f4c95d;--blue:#60a5fa}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",Tahoma,Arial,sans-serif}
+header{padding:18px clamp(14px,3vw,34px);display:flex;align-items:center;justify-content:space-between;gap:12px;border-bottom:1px solid var(--line);background:#0b1118;position:sticky;top:0;z-index:3}
+.brand{display:flex;gap:10px;align-items:center}.logo{background:linear-gradient(135deg,#25d695,#147b64);color:#03140e;font-weight:900;border-radius:12px;padding:10px}.brand h1{font-size:18px;margin:0}.brand small{display:block;color:var(--muted);font-size:11px;margin-top:3px}
+button,select{background:#17232e;border:1px solid #2a3b49;color:var(--text);border-radius:9px;padding:10px 12px;font:inherit}button{cursor:pointer}button.primary{background:#0e6048;border-color:#178f68}button:hover{filter:brightness(1.15)}
+main{max-width:1450px;margin:auto;padding:18px;display:grid;gap:14px}.toolbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center}.toolbar label{color:var(--muted);font-size:12px}.toolbar select{min-width:105px}
+.grid{display:grid;grid-template-columns:minmax(0,1.8fr) minmax(280px,1fr);gap:14px}.panel{background:var(--panel);border:1px solid var(--line);border-radius:15px;padding:15px;min-width:0}.panel h2{font-size:15px;margin:0 0 14px}.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}.stat{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:13px}.stat span{display:block;color:var(--muted);font-size:12px}.stat strong{display:block;font-size:20px;margin-top:8px;direction:ltr;text-align:right}.positive{color:var(--green)}.negative{color:var(--red)}#chart{height:410px;width:100%}.chart-head{display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:8px}.price{font-size:24px;font-weight:750;direction:ltr}.sub{font-size:12px;color:var(--muted)}.signal{border-radius:12px;padding:14px;border:1px solid var(--line);background:var(--panel2)}.signal .badge{display:inline-block;padding:5px 9px;border-radius:7px;font-weight:700;margin-bottom:9px}.buy{color:var(--green);background:#10382e}.sell{color:var(--red);background:#401d28}.wait{color:var(--gold);background:#3d3218}.levels{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:12px}.level{padding:10px;background:#0a1118;border:1px solid var(--line);border-radius:9px}.level span{display:block;color:var(--muted);font-size:11px}.level b{direction:ltr;display:block;margin-top:5px}.indicators{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.indicator{padding:11px;background:var(--panel2);border:1px solid var(--line);border-radius:10px}.indicator span{display:block;color:var(--muted);font-size:12px}.indicator b{display:block;margin-top:6px;direction:ltr;text-align:right}.wide{grid-column:1/-1}.table-wrap{overflow:auto}table{border-collapse:collapse;width:100%;font-size:13px}th,td{padding:11px 9px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}th{color:var(--muted);font-weight:600}td.ltr{direction:ltr;text-align:left}.notice{font-size:12px;line-height:1.8;color:var(--muted);padding:12px;border-radius:10px;background:#111923}.status{font-size:12px;color:var(--muted)}.dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--gold);margin-left:6px}.dot.ok{background:var(--green)}footer{text-align:center;color:var(--muted);font-size:11px;padding:10px 0 24px}
+@media(max-width:850px){.grid{grid-template-columns:1fr}.stats{grid-template-columns:repeat(2,minmax(0,1fr))}#chart{height:330px}.wide{grid-column:auto}}
+@media(max-width:430px){main{padding:10px}.panel{padding:12px}.stat strong{font-size:17px}.brand h1{font-size:15px}.price{font-size:20px}}
+</style>
+</head>
+<body>
+<header>
+ <div class="brand"><div class="logo">AT</div><div><h1>Abdenasir AI Trading</h1><small>لوحة تحليل الأسواق — نسخة تجريبية</small></div></div>
+ <div class="status"><span class="dot" id="connectionDot"></span><span id="connectionText">جاري الاتصال بالسوق...</span></div>
+</header>
+<main>
+ <section class="toolbar panel">
+  <label for="symbol">الزوج</label><select id="symbol"><option>BTCUSDT</option><option>ETHUSDT</option><option>BNBUSDT</option><option>SOLUSDT</option><option>XRPUSDT</option><option>OPUSDT</option><option>SUIUSDT</option><option>DOGEUSDT</option><option>ADAUSDT</option></select>
+  <label for="interval">الفريم</label><select id="interval"><option value="1m">1 دقيقة</option><option value="5m">5 دقائق</option><option value="15m">15 دقيقة</option><option value="30m" selected>30 دقيقة</option><option value="1h">ساعة</option><option value="4h">4 ساعات</option><option value="1d">يومي</option></select>
+  <button class="primary" id="refresh">تحديث البيانات</button>
+  <button id="alerts">تفعيل تنبيه المتصفح</button>
+  <button id="testAlert">اختبار التنبيه</button>
+ </section>
+ <section class="stats">
+  <div class="stat"><span>السعر الحالي (USDT)</span><strong id="currentPrice">—</strong></div>
+  <div class="stat"><span>التغير خلال 24 ساعة</span><strong id="change24">—</strong></div>
+  <div class="stat"><span>أعلى سعر 24 ساعة</span><strong id="high24">—</strong></div>
+  <div class="stat"><span>أقل سعر 24 ساعة</span><strong id="low24">—</strong></div>
+ </section>
+ <section class="grid">
+  <div class="panel">
+   <div class="chart-head"><div><h2 id="chartTitle">الرسم البياني</h2><div class="sub">شموع سعرية — بيانات عامة من Binance</div></div><div class="price" id="chartPrice">—</div></div>
+   <div id="chart"></div>
+  </div>
+  <aside class="panel">
+   <h2>إشارة التحليل الفني</h2>
+   <div class="signal"><div id="signalBadge" class="badge wait">جاري التحليل</div><div id="signalSummary">يتم تحميل بيانات الشموع...</div>
+    <div class="levels">
+     <div class="level"><span>دخول إرشادي</span><b id="entry">—</b></div>
+     <div class="level"><span>وقف خسارة تقديري</span><b id="stop">—</b></div>
+     <div class="level"><span>الهدف الأول (1R)</span><b id="target1">—</b></div>
+     <div class="level"><span>الهدف الثاني (2R)</span><b id="target2">—</b></div>
+    </div>
+   </div>
+   <h2 style="margin-top:18px">المؤشرات</h2>
+   <div class="indicators">
+    <div class="indicator"><span>EMA 9</span><b id="ema9">—</b></div>
+    <div class="indicator"><span>EMA 21</span><b id="ema21">—</b></div>
+    <div class="indicator"><span>RSI (14)</span><b id="rsi">—</b></div>
+    <div class="indicator"><span>الحجم الحالي</span><b id="volume">—</b></div>
+   </div>
+  </aside>
+  <div class="panel wide"><h2>مستويات السوق القريبة</h2><div class="indicators">
+   <div class="indicator"><span>مقاومة تقديرية</span><b id="resistance">—</b></div>
+   <div class="indicator"><span>دعم تقديري</span><b id="support">—</b></div>
+  </div></div>
+  <div class="panel wide"><h2>سجل التنبيهات</h2><div id="alertLog" class="notice">لا توجد تنبيهات بعد. سيظهر هنا عند تحقق شروط الإشارة أو عند اختبار التنبيه.</div></div>
+  <div class="panel wide"><h2>آخر الشموع</h2><div class="table-wrap"><table><thead><tr><th>الوقت</th><th>الافتتاح</th><th>الأعلى</th><th>الأدنى</th><th>الإغلاق</th><th>الحجم</th></tr></thead><tbody id="candles"><tr><td colspan="6">بانتظار البيانات...</td></tr></tbody></table></div></div>
+ </section>
+ <div class="notice">تنبيه: هذه نسخة أولية للتحليل الفني بقواعد حسابية وليست ذكاءً اصطناعياً تنبؤياً، والإشارات احتمالية وليست توصية مالية أو ضماناً للربح. مستويات الدخول والوقف والأهداف تقديرية؛ تحقّق منها قبل أي صفقة. بيانات السوق العامة تحتاج اتصال إنترنت وقد لا تعمل بعض الشبكات أو المتصفحات مع مصدر البيانات.</div>
+ <footer>Abdenasir AI Trading • إصدار تجريبي 0.1</footer>
+</main>
+<script>
+const $=id=>document.getElementById(id);
+let chart,candleSeries,volSeries,lastSignal=''; let candleData=[];
+function logAlert(message){const box=$('alertLog');const line=document.createElement('div');line.style.padding='5px 0';line.textContent=new Date().toLocaleTimeString('ar')+' — '+message;box.prepend(line);while(box.children.length>6)box.removeChild(box.lastChild);}
+async function requestNotifications(){if(!('Notification' in window)){alert('هذا المتصفح لا يدعم تنبيهات المتصفح. استخدم سجل التنبيهات داخل المنصة.');return false;}try{let p=Notification.permission;if(p==='default')p=await Notification.requestPermission();if(p==='granted'){logAlert('تم تفعيل تنبيهات المتصفح.');return true;}logAlert('إشعارات المتصفح غير مسموح بها؛ راجع أذونات الموقع في إعدادات المتصفح.');alert('الإشعارات غير مسموح بها. اسمح بها من إعدادات الموقع في المتصفح.');return false;}catch(e){logAlert('تعذر طلب إذن الإشعارات. افتح الصفحة عبر موقع HTTPS إن أمكن.');return false;}}
+function notifyUser(title,message){logAlert(message);if('Notification' in window && Notification.permission==='granted'){try{new Notification(title,{body:message});}catch(e){}}}
+function fmt(v){if(!Number.isFinite(v))return '—'; return v>=1000?v.toLocaleString('en-US',{maximumFractionDigits:2}):v>=1?v.toLocaleString('en-US',{maximumFractionDigits:4}):v.toLocaleString('en-US',{maximumFractionDigits:6});}
+function shortVol(v){return v>=1e9?(v/1e9).toFixed(2)+'B':v>=1e6?(v/1e6).toFixed(2)+'M':v>=1e3?(v/1e3).toFixed(2)+'K':fmt(v)}
+function setStatus(ok,msg){$('connectionDot').className='dot'+(ok?' ok':'');$('connectionText').textContent=msg}
+function initChart(){const el=$('chart');chart=LightweightCharts.createChart(el,{layout:{background:{color:'#111923'},textColor:'#91a2b4'},grid:{vertLines:{color:'#1c2934'},horzLines:{color:'#1c2934'}},rightPriceScale:{borderColor:'#2a3b49'},timeScale:{borderColor:'#2a3b49',timeVisible:true,secondsVisible:false},crosshair:{mode:0},width:el.clientWidth,height:410});candleSeries=chart.addCandlestickSeries({upColor:'#25d695',downColor:'#ff657a',borderUpColor:'#25d695',borderDownColor:'#ff657a',wickUpColor:'#25d695',wickDownColor:'#ff657a'});volSeries=chart.addHistogramSeries({priceFormat:{type:'volume'},priceScaleId:'',scaleMargins:{top:.82,bottom:0}});new ResizeObserver(()=>chart.applyOptions({width:el.clientWidth})).observe(el)}
+function ema(vals,n){let k=2/(n+1),out=[],e=vals[0];for(let i=0;i<vals.length;i++){e=i===0?vals[i]:vals[i]*k+e*(1-k);out.push(e)}return out}
+function rsi(vals,n=14){if(vals.length<n+1)return 50;let gain=0,loss=0;for(let i=vals.length-n;i<vals.length;i++){let d=vals[i]-vals[i-1];if(d>0)gain+=d;else loss-=d}if(loss===0)return 100;return 100-100/(1+gain/loss)}
+function calculate(){if(candleData.length<25)return;let closes=candleData.map(c=>c.close),e9=ema(closes,9),e21=ema(closes,21),rv=rsi(closes),last=closes.at(-1),prev=closes.at(-2),atr=candleData.slice(-14).reduce((s,c)=>s+(c.high-c.low),0)/14; $('ema9').textContent=fmt(e9.at(-1));$('ema21').textContent=fmt(e21.at(-1));$('rsi').textContent=rv.toFixed(1);$('volume').textContent=shortVol(candleData.at(-1).volume);
+let dir='wait',summary='الإشارات غير متوافقة بوضوح؛ الأفضل انتظار تأكيد جديد.';if(e9.at(-1)>e21.at(-1)&&last>e9.at(-1)&&rv>=50&&rv<70){dir='buy';summary='ميل صاعد وفق تقاطع EMA والسعر وRSI. انتظر تأكيد الشمعة ولا تطارد السعر.'}else if(e9.at(-1)<e21.at(-1)&&last<e9.at(-1)&&rv<=50&&rv>30){dir='sell';summary='ميل هابط وفق تقاطع EMA والسعر وRSI. انتظر تأكيد الشمعة.'}
+let badge=$('signalBadge');badge.className='badge '+(dir==='buy'?'buy':dir==='sell'?'sell':'wait');badge.textContent=dir==='buy'?'شراء محتمل':dir==='sell'?'بيع محتمل':'انتظار';$('signalSummary').textContent=summary;
+let stopDist=Math.max(atr*1.5,last*.002),isBuy=dir==='buy';$('entry').textContent=fmt(last);$('stop').textContent=dir==='wait'?'—':fmt(last+(isBuy?-stopDist:stopDist));$('target1').textContent=dir==='wait'?'—':fmt(last+(isBuy?stopDist:-stopDist));$('target2').textContent=dir==='wait'?'—':fmt(last+(isBuy?stopDist*2:-stopDist*2));
+let slice=candleData.slice(-20);$('resistance').textContent=fmt(Math.max(...slice.map(c=>c.high)));$('support').textContent=fmt(Math.min(...slice.map(c=>c.low)));
+if(dir!=='wait'&&dir!==lastSignal){lastSignal=dir;notifyUser('Abdenasir AI Trading',`${$('symbol').value}: ${badge.textContent} — ${fmt(last)}`);}
+$('candles').innerHTML=candleData.slice(-8).reverse().map(c=>`<tr><td>${new Date(c.time*1000).toLocaleString('ar',{month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'})}</td><td class="ltr">${fmt(c.open)}</td><td class="ltr">${fmt(c.high)}</td><td class="ltr">${fmt(c.low)}</td><td class="ltr">${fmt(c.close)}</td><td class="ltr">${shortVol(c.volume)}</td></tr>`).join('');
+}
+async function load(){const sym=$('symbol').value,iv=$('interval').value;setStatus(false,'جاري تحديث البيانات...');$('chartTitle').textContent=sym+' · '+iv;
+try{let base='https://api.binance.com';let [kl,ticker]=await Promise.all([fetch(`${base}/api/v3/klines?symbol=${sym}&interval=${iv}&limit=120`),fetch(`${base}/api/v3/ticker/24hr?symbol=${sym}`)]);if(!kl.ok||!ticker.ok)throw Error('تعذر الوصول إلى بيانات Binance');let raw=await kl.json(),t=await ticker.json();candleData=raw.map(k=>({time:Math.floor(k[0]/1000),open:+k[1],high:+k[2],low:+k[3],close:+k[4],volume:+k[5]}));candleSeries.setData(candleData);volSeries.setData(candleData.map(c=>({time:c.time,value:c.volume,color:c.close>=c.open?'#176b55':'#813545'})));chart.timeScale().fitContent();let price=+t.lastPrice,chg=+t.priceChangePercent;$('currentPrice').textContent=fmt(price);$('chartPrice').textContent=fmt(price);$('change24').textContent=(chg>=0?'+':'')+chg.toFixed(2)+'%';$('change24').className=chg>=0?'positive':'negative';$('high24').textContent=fmt(+t.highPrice);$('low24').textContent=fmt(+t.lowPrice);calculate();setStatus(true,'متصل · بيانات مباشرة');}catch(e){setStatus(false,'تعذر الاتصال');$('signalSummary').textContent='لم نتمكن من تحميل البيانات. تأكد من الإنترنت أو جرّب لاحقاً. '+e.message}}
+$('refresh').addEventListener('click',load);$('symbol').addEventListener('change',load);$('interval').addEventListener('change',load);$('alerts').addEventListener('click',requestNotifications);
+$('testAlert').addEventListener('click',async()=>{const ok=await requestNotifications();notifyUser('اختبار التنبيه','هذا تنبيه تجريبي من Abdenasir AI Trading. إذا لم يظهر خارج الصفحة، استخدم سجل التنبيهات داخل المنصة وتحقق من أذونات المتصفح.');if(ok)alert('أرسلنا تنبيهاً تجريبياً. إذا لم يظهر، راجع إعدادات إشعارات Chrome والهاتف.');});
+initChart();load();setInterval(load,60000);
+</script>
+</body>
+</html>
