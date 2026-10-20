@@ -91,21 +91,53 @@ function analyzeGold() {
   const low = Number(document.getElementById("goldLow").value);
   const result = document.getElementById("goldResult");
 
-  if (!price || !high || !low || high <= low ||
-      price < low || price > high) {
-    result.textContent = "تأكد من صحة الأسعار.";
+  if (
+    !Number.isFinite(price) ||
+    !Number.isFinite(high) ||
+    !Number.isFinite(low) ||
+    price <= 0 ||
+    low <= 0 ||
+    high <= low ||
+    price < low ||
+    price > high
+  ) {
+    result.textContent = "تأكد من صحة السعر والقمة والقاع.";
     return;
   }
 
   const midpoint = (high + low) / 2;
+  const risk = Math.abs(price - midpoint);
+
+  if (risk === 0) {
+    result.textContent = "السعر في منتصف النطاق؛ انتظر تأكيد الاتجاه.";
+    return;
+  }
+
+  let direction;
+  let stop;
+  let target1;
+  let target2;
 
   if (price > midpoint) {
-    result.textContent = "الاتجاه المبدئي صاعد 📈";
-  } else if (price < midpoint) {
-    result.textContent = "الاتجاه المبدئي هابط 📉";
+    direction = "صاعد مبدئياً 📈";
+    stop = midpoint;
+    target1 = price + risk * 2;
+    target2 = price + risk * 3;
   } else {
-    result.textContent = "السعر في منتصف النطاق.";
+    direction = "هابط مبدئياً 📉";
+    stop = midpoint;
+    target1 = price - risk * 2;
+    target2 = price - risk * 3;
   }
+
+  result.innerHTML =
+    "<br>الاتجاه المبدئي: " + direction +
+    "<br>السعر الحالي: " + price.toFixed(2) +
+    "<br>منطقة الدخول المحتملة: " + price.toFixed(2) +
+    "<br>وقف الخسارة: " + stop.toFixed(2) +
+    "<br>الهدف الأول (2R): " + target1.toFixed(2) +
+    "<br>الهدف الثاني (3R): " + target2.toFixed(2) +
+    "<br><br>تنبيه: هذا حساب تعليمي مبسط، وليس إشارة تداول مؤكدة.";
 }
   function calculateRisk() {
   const balance = Number(document.getElementById('balance').value);
