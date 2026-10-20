@@ -70,9 +70,44 @@ button {
   <button onclick="calculateRisk()">احسب المخاطرة</button>
   <p id="result"></p>
 </div>
+<div class="card">
+  <h2>تحليل الذهب XAUUSD</h2>
+  <label>السعر الحالي:</label>
+  <input type="number" id="goldPrice" placeholder="أدخل سعر الذهب">
 
+  <label>آخر قمة:</label>
+  <input type="number" id="goldHigh" placeholder="أدخل آخر قمة">
+
+  <label>آخر قاع:</label>
+  <input type="number" id="goldLow" placeholder="أدخل آخر قاع">
+
+  <button onclick="analyzeGold()">حلل الذهب</button>
+  <p id="goldResult"></p>
+</div>
 <script>
-function calculateRisk() {
+function analyzeGold() {
+  const price = Number(document.getElementById("goldPrice").value);
+  const high = Number(document.getElementById("goldHigh").value);
+  const low = Number(document.getElementById("goldLow").value);
+  const result = document.getElementById("goldResult");
+
+  if (!price || !high || !low || high <= low ||
+      price < low || price > high) {
+    result.textContent = "تأكد من صحة الأسعار.";
+    return;
+  }
+
+  const midpoint = (high + low) / 2;
+
+  if (price > midpoint) {
+    result.textContent = "الاتجاه المبدئي صاعد 📈";
+  } else if (price < midpoint) {
+    result.textContent = "الاتجاه المبدئي هابط 📉";
+  } else {
+    result.textContent = "السعر في منتصف النطاق.";
+  }
+}
+  function calculateRisk() {
   const balance = Number(document.getElementById('balance').value);
   const risk = Number(document.getElementById('risk').value);
   const result = document.getElementById('result');
