@@ -61,5 +61,31 @@ button {
 <p>هذه المنصة تعليمية، ولا تعرض أسعاراً مباشرة أو توصيات تداول حقيقية.</p>
 </div>
 
+  <div class="card">
+  <h2>حاسبة إدارة المخاطر</h2>
+  <label>رصيد الحساب بالدولار:</label>
+  <input type="number" id="balance" value="200">
+  <label>نسبة المخاطرة (%):</label>
+  <input type="number" id="risk" value="1" step="0.1">
+  <button onclick="calculateRisk()">احسب المخاطرة</button>
+  <p id="result"></p>
+</div>
+
+<script>
+function calculateRisk() {
+  const balance = Number(document.getElementById('balance').value);
+  const risk = Number(document.getElementById('risk').value);
+  const result = document.getElementById('result');
+
+  if (balance <= 0 || risk <= 0 || risk > 100) {
+    result.textContent = 'أدخل رصيدًا ونسبة مخاطرة صحيحة.';
+    return;
+  }
+
+  result.textContent =
+    'الحد الأقصى للخسارة: $' +
+    (balance * risk / 100).toFixed(2);
+}
+</script>
 </body>
 </html>
