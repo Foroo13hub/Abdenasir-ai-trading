@@ -3,161 +3,161 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Abdenasir AI Trading</title>
+<meta name="theme-color" content="#08111d">
+<link rel="manifest" href="./manifest.json">
+<link rel="icon" href="./icon.svg" type="image/svg+xml">
+<title>Abdenasir Crypto AI</title>
 <style>
-body {
-  margin: 0;
-  background: #090d12;
-  color: white;
-  font-family: Arial, sans-serif;
-  padding: 20px;
-}
-header {
-  text-align: center;
-  padding: 20px;
-  color: #38bdf8;
-  font-size: 25px;
-}
-.card {
-  background: #111923;
-  border: 1px solid #263445;
-  border-radius: 14px;
-  padding: 18px;
-  margin: 15px 0;
-}
-h2 { color: #38bdf8; }
-p { color: #cbd5e1; line-height: 1.8; }
-button {
-  background: #087f5b;
-  color: white;
-  border: none;
-  padding: 12px 20px;
-  border-radius: 8px;
-  font-size: 16px;
-}
+:root{--bg:#08111d;--panel:#101c2b;--panel2:#142337;--line:#263a51;--text:#e7eef8;--muted:#9fb0c5;--blue:#38bdf8;--green:#21c58e;--red:#ff647c;--gold:#f5bf4f}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at top,#102238 0,#08111d 42%);color:var(--text);font-family:Arial,"Noto Sans Arabic",sans-serif;padding:16px;line-height:1.65}
+.wrap{max-width:1050px;margin:auto}header{text-align:center;padding:10px 0 20px}h1{font-size:clamp(25px,5vw,38px);margin:0;color:var(--blue)}header p{color:var(--muted);margin:4px 0}
+.toolbar,.grid{display:grid;gap:12px}.toolbar{grid-template-columns:repeat(3,minmax(0,1fr));margin-bottom:14px}.grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+.card{background:linear-gradient(145deg,rgba(20,35,55,.97),rgba(13,25,40,.97));border:1px solid var(--line);border-radius:16px;padding:16px;min-width:0;box-shadow:0 10px 30px #0002}
+label{display:block;color:var(--muted);font-size:13px;margin-bottom:5px}select,input,button{font:inherit;border-radius:10px;border:1px solid #354c65;padding:10px;background:#091523;color:var(--text);width:100%;min-width:0}
+button{background:#087e66;border:0;font-weight:700;cursor:pointer}button.secondary{background:#20364e}button:disabled{opacity:.6}
+.row{display:flex;gap:8px;align-items:center}.row>*{flex:1}.metric{font-size:25px;font-weight:700;overflow-wrap:anywhere}.muted{color:var(--muted)}.small{font-size:12px}.pill{display:inline-block;border-radius:99px;padding:3px 10px;font-size:12px;background:#23354a;color:#d9e8f8}.up{color:var(--green)}.down{color:var(--red)}.gold{color:var(--gold)}
+h2{font-size:18px;margin:0 0 12px}h3{font-size:15px;margin:0 0 5px;color:var(--muted)}.signal{font-size:25px;font-weight:800}.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.stat{background:#0a1624;border:1px solid #22364d;padding:10px;border-radius:11px;min-width:0}.stat b{display:block;overflow-wrap:anywhere}.list{padding:0;margin:0;list-style:none}.list li{padding:8px 0;border-bottom:1px solid #26384c}.list li:last-child{border:0}
+.notice{border-right:4px solid var(--gold);background:#211d12;padding:10px 12px;border-radius:8px;color:#f6d99b;margin-top:14px;font-size:13px}.status{margin:10px 0;color:var(--muted);font-size:13px}.status.ok{color:var(--green)}.status.err{color:var(--red)}
+table{width:100%;border-collapse:collapse;font-size:13px}td,th{text-align:right;padding:8px;border-bottom:1px solid #26384c}canvas{width:100%;height:130px;display:block;background:#0a1624;border-radius:10px}
+footer{text-align:center;color:var(--muted);font-size:12px;padding:18px 0}
+@media(max-width:680px){.toolbar{grid-template-columns:1fr 1fr}.toolbar .wide{grid-column:span 2}.grid{grid-template-columns:1fr}.stats{grid-template-columns:repeat(3,minmax(0,1fr))}.card{padding:13px}}
 </style>
 </head>
 <body>
+<div class="wrap">
+<header>
+<h1>Abdenasir Crypto AI</h1>
+<p>لوحة تحليل العملات الرقمية وإدارة المخاطر</p>
+<span class="pill">تحليل تعليمي — لا ينفّذ صفقات</span>
+</header>
 
-<header>Abdenasir AI Trading</header>
+<section class="toolbar card">
+<div><label for="coin">العملة</label><select id="coin"><option value="BTCUSDT">BTC — بيتكوين</option><option value="ETHUSDT">ETH — إيثيريوم</option><option value="SOLUSDT">SOL — سولانا</option><option value="SUIUSDT">SUI — سوي</option><option value="BNBUSDT">BNB — باينانس كوين</option><option value="XRPUSDT">XRP — ريبل</option><option value="DOGEUSDT">DOGE — دوجكوين</option><option value="ADAUSDT">ADA — كاردانو</option></select></div>
+<div><label for="interval">الإطار الزمني</label><select id="interval"><option value="5m">5 دقائق</option><option value="15m" selected>15 دقيقة</option><option value="1h">ساعة</option><option value="4h">4 ساعات</option><option value="1d">يومي</option></select></div>
+<div><label>تحديث البيانات</label><button id="refresh">تحديث الآن</button></div>
+<div class="wide"><div class="status" id="status">جاهز لجلب بيانات السوق العامة من Binance…</div></div>
+</section>
 
+<section class="grid">
 <div class="card">
-<h2>مرحباً بك في منصة التداول</h2>
-<p>منصتك لمتابعة الأسواق وتعلّم التداول وإدارة المخاطر.</p>
+<h2>السعر الحالي</h2>
+<div class="metric" id="price">—</div>
+<div id="change" class="muted">تغير آخر 24 ساعة: —</div>
+<div class="stats" style="margin-top:12px">
+<div class="stat"><span class="small muted">أعلى 24س</span><b id="high">—</b></div>
+<div class="stat"><span class="small muted">أدنى 24س</span><b id="low">—</b></div>
+<div class="stat"><span class="small muted">حجم التداول</span><b id="volume">—</b></div>
 </div>
-
-<div class="card">
-<h2>الذهب XAUUSD</h2>
-<p>تابع حركة الذهب وحلّل السوق قبل اتخاذ قرار التداول.</p>
-</div>
-
-<div class="card">
-<h2>إدارة المخاطر</h2>
-<p>حدد وقف الخسارة وحجم الصفقة قبل الدخول إلى السوق.</p>
-</div>
-
-<div class="card">
-<h2>تنبيه مهم</h2>
-<p>هذه المنصة تعليمية، ولا تعرض أسعاراً مباشرة أو توصيات تداول حقيقية.</p>
-</div>
-
-  <div class="card">
-  <h2>حاسبة إدارة المخاطر</h2>
-  <label>رصيد الحساب بالدولار:</label>
-  <input type="number" id="balance" value="200">
-  <label>نسبة المخاطرة (%):</label>
-  <input type="number" id="risk" value="1" step="0.1">
-  <button onclick="calculateRisk()">احسب المخاطرة</button>
-  <p id="result"></p>
 </div>
 <div class="card">
-  <h2>تحليل الذهب XAUUSD</h2>
-  <label>السعر الحالي:</label>
-  <input type="number" id="goldPrice" placeholder="أدخل سعر الذهب">
-
-  <label>آخر قمة:</label>
-  <input type="number" id="goldHigh" placeholder="أدخل آخر قمة">
-
-  <label>آخر قاع:</label>
-  <input type="number" id="goldLow" placeholder="أدخل آخر قاع">
-
-  <button onclick="analyzeGold()">حلل الذهب</button>
-  <p id="goldResult"></p>
+<h2>خلاصة التحليل</h2>
+<div class="signal" id="signal">جارٍ التحليل…</div>
+<p id="summary" class="muted">نحتاج بيانات شموع كافية لإظهار قراءة تقريبية.</p>
+<div class="stats">
+<div class="stat"><span class="small muted">RSI (14)</span><b id="rsi">—</b></div>
+<div class="stat"><span class="small muted">SMA 20</span><b id="sma20">—</b></div>
+<div class="stat"><span class="small muted">SMA 50</span><b id="sma50">—</b></div>
+</div>
+</div>
+<div class="card">
+<h2>حركة السعر — آخر الشموع</h2>
+<canvas id="chart" width="800" height="220"></canvas>
+<p class="small muted">رسم مبسّط لإغلاقات الشموع، وليس بديلاً عن مخطط احترافي.</p>
+</div>
+<div class="card">
+<h2>خطة إدارة المخاطر</h2>
+<div class="row">
+<div><label for="balance">رصيد الحساب (USDT)</label><input id="balance" type="number" min="0" value="200"></div>
+<div><label for="risk">المخاطرة (%)</label><input id="risk" type="number" min="0.1" max="5" step="0.1" value="1"></div>
+</div>
+<div class="stats" style="margin-top:10px">
+<div class="stat"><span class="small muted">مبلغ المخاطرة</span><b id="riskcash">2.00 USDT</b></div>
+<div class="stat"><span class="small muted">وقف الخسارة التقريبي</span><b id="stop">—</b></div>
+<div class="stat"><span class="small muted">هدف 2R</span><b id="target">—</b></div>
+</div>
+<p class="small muted" id="position">حجم المركز يُحسب بعد وصول البيانات.</p>
+</div>
+<div class="card">
+<h2>تنبيهات التطبيق</h2>
+<p class="muted">فعّل إشعارات المتصفح لتلقي تنبيه عند تغيّر تصنيف التحليل أثناء بقاء الصفحة مفتوحة.</p>
+<button id="notify" class="secondary">تفعيل الإشعارات</button>
+<div id="notifyStatus" class="status">الإشعارات غير مفعّلة.</div>
+</div>
+<div class="card">
+<h2>قواعد قراءة الإشارة</h2>
+<ul class="list">
+<li><span class="up">صعود مبدئي</span> — السعر فوق SMA20 وSMA20 فوق SMA50 وRSI غير مرتفع بشدة.</li>
+<li><span class="down">هبوط مبدئي</span> — السعر تحت SMA20 وSMA20 تحت SMA50 وRSI غير منخفض بشدة.</li>
+<li><span class="gold">انتظار</span> — الإشارات متضاربة أو السوق في منطقة قد تكون ممتدة.</li>
+</ul>
+<p class="small muted">هذه قواعد فنية مبسطة وليست نموذج ذكاء اصطناعي ولا تضمن الربح.</p>
+</div>
+</section>
+<div class="notice">تنبيه مهم: الأسعار تأتي من واجهة Binance العامة وقد لا تعمل على بعض الشبكات. لا توجد مفاتيح API أو ربط حساب تداول هنا، ولا تُرسل أوامر شراء/بيع. راجع السعر والانزلاق والرسوم بنفسك قبل أي قرار.</div>
+<footer>Abdenasir Crypto AI • نسخة أولية تعمل عبر اتصال الإنترنت</footer>
 </div>
 <script>
-function analyzeGold() {
-  const price = Number(document.getElementById("goldPrice").value);
-  const high = Number(document.getElementById("goldHigh").value);
-  const low = Number(document.getElementById("goldLow").value);
-  const result = document.getElementById("goldResult");
-
-  if (
-    !Number.isFinite(price) ||
-    !Number.isFinite(high) ||
-    !Number.isFinite(low) ||
-    price <= 0 ||
-    low <= 0 ||
-    high <= low ||
-    price < low ||
-    price > high
-  ) {
-    result.textContent =
-      "⚠️ تأكد من صحة السعر والقمة والقاع.";
-    return;
-  }
-
-  const midpoint = (high + low) / 2;
-
-  if (price === midpoint) {
-    result.textContent =
-      "⏳ السعر في منتصف النطاق. انتظر تأكيد الاتجاه.";
-    return;
-  }
-
-  let direction;
-  let stop;
-  let risk;
-  let target1;
-  let target2;
-
-  if (price > midpoint) {
-    direction = "صاعد مبدئياً 📈";
-    stop = low;
-    risk = price - stop;
-    target1 = price + risk * 2;
-    target2 = price + risk * 3;
-  } else {
-    direction = "هابط مبدئياً 📉";
-    stop = high;
-    risk = stop - price;
-    target1 = price - risk * 2;
-    target2 = price - risk * 3;
-  }
-
-  result.innerHTML =
-    "<br>الاتجاه المبدئي: " + direction +
-    "<br>السعر الحالي: " + price.toFixed(2) +
-    "<br>منتصف النطاق: " + midpoint.toFixed(2) +
-    "<br>منطقة الدخول المرجعية: " + price.toFixed(2) +
-    "<br>وقف الخسارة: " + stop.toFixed(2) +
-    "<br>الهدف الأول (2R): " + target1.toFixed(2) +
-    "<br>الهدف الثاني (3R): " + target2.toFixed(2) +
-    "<br><br>⚠️ تحليل تعليمي يعتمد على النطاق المدخل، وليس إشارة تداول مؤكدة.";
+const $=id=>document.getElementById(id);
+let lastSignal="", notificationEnabled=false, latest=null, timer=null;
+const fmt=(n,d=2)=>Number.isFinite(n)?n.toLocaleString('en-US',{minimumFractionDigits:d,maximumFractionDigits:d}):'—';
+const symbol=()=> $('coin').value;
+function setStatus(msg,kind=''){ $('status').textContent=msg; $('status').className='status '+kind; }
+function sma(a,n){if(a.length<n)return NaN;return a.slice(-n).reduce((x,y)=>x+y,0)/n;}
+function rsi(a,n=14){if(a.length<n+1)return NaN;let gain=0,loss=0;for(let i=a.length-n;i<a.length;i++){let d=a[i]-a[i-1];if(d>0)gain+=d;else loss-=d;}if(loss===0)return 100;return 100-100/(1+(gain/n)/(loss/n));}
+async function getJSON(url){const res=await fetch(url,{cache:'no-store'});if(!res.ok)throw new Error('HTTP '+res.status);return res.json();}
+async function load(){
+ $('refresh').disabled=true;setStatus('جارٍ تحميل بيانات السوق…');
+ try{
+  const s=symbol(), int=$('interval').value;
+  const [ticker, candles]=await Promise.all([
+   getJSON('https://api.binance.com/api/v3/ticker/24hr?symbol='+s),
+   getJSON('https://api.binance.com/api/v3/klines?symbol='+s+'&interval='+int+'&limit=100')
+  ]);
+  const closes=candles.map(c=>Number(c[4])), highs=candles.map(c=>Number(c[2])), lows=candles.map(c=>Number(c[3]));
+  const p=Number(ticker.lastPrice), ch=Number(ticker.priceChangePercent), s20=sma(closes,20), s50=sma(closes,50), rv=rsi(closes);
+  $('price').textContent=fmt(p, p<1?6:2)+' USDT';
+  $('change').textContent='تغير آخر 24 ساعة: '+(ch>=0?'+':'')+fmt(ch,2)+'%';
+  $('change').className=ch>=0?'up':'down';
+  $('high').textContent=fmt(Number(ticker.highPrice),p<1?6:2);
+  $('low').textContent=fmt(Number(ticker.lowPrice),p<1?6:2);
+  $('volume').textContent=fmt(Number(ticker.quoteVolume)/1e6,2)+'M USDT';
+  $('rsi').textContent=fmt(rv,1);$('sma20').textContent=fmt(s20,p<1?6:2);$('sma50').textContent=fmt(s50,p<1?6:2);
+  let sig='انتظار', desc='الاتجاه غير واضح بما يكفي؛ الأفضل عدم الاستعجال.';
+  if(p>s20&&s20>s50&&rv>=45&&rv<70){sig='صعود مبدئي';desc='السعر أعلى المتوسطات والاتجاه قصير المدى إيجابي، لكن يلزم تأكيد من حركة السعر.';}
+  else if(p<s20&&s20<s50&&rv>30&&rv<=55){sig='هبوط مبدئي';desc='السعر أسفل المتوسطات والاتجاه قصير المدى سلبي، لكن يلزم تأكيد من حركة السعر.';}
+  else if(rv>=70){sig='انتظار — RSI مرتفع';desc='الزخم مرتفع وقد يكون السعر ممتداً؛ لا تطارد الحركة.';}
+  else if(rv<=30){sig='انتظار — RSI منخفض';desc='الزخم منخفض؛ لا تفترض الارتداد دون تأكيد.';}
+  $('signal').textContent=sig;$('signal').className='signal '+(sig.includes('صعود')?'up':sig.includes('هبوط')?'down':'gold');$('summary').textContent=desc;
+  const recent=closes.slice(-60), lo=Math.min(...recent), hi=Math.max(...recent);drawChart(recent,lo,hi);
+  const tr=[];for(let i=1;i<candles.length;i++){tr.push(Math.max(highs[i]-lows[i],Math.abs(highs[i]-closes[i-1]),Math.abs(lows[i]-closes[i-1])));}
+  const atr=tr.slice(-14).reduce((a,b)=>a+b,0)/Math.min(14,tr.length);
+  latest={p,atr,sig,rv,closes};calcRisk();
+  if(notificationEnabled&&lastSignal&&sig!==lastSignal&&Notification.permission==='granted'){new Notification('Abdenasir Crypto AI',{body:s+' — '+sig+' على فريم '+int});}
+  lastSignal=sig;
+  setStatus('تم تحديث البيانات: '+new Date().toLocaleTimeString('ar'), 'ok');
+ }catch(e){
+  setStatus('تعذّر جلب البيانات. تحقق من الإنترنت أو جرّب لاحقاً. ('+e.message+')','err');
+  $('signal').textContent='البيانات غير متاحة';$('summary').textContent='قد تكون واجهة Binance محجوبة على شبكتك أو الاتصال غير مستقر.';
+ }finally{$('refresh').disabled=false;}
 }
-  function calculateRisk() {
-  const balance = Number(document.getElementById('balance').value);
-  const risk = Number(document.getElementById('risk').value);
-  const result = document.getElementById('result');
-
-  if (balance <= 0 || risk <= 0 || risk > 100) {
-    result.textContent = 'أدخل رصيدًا ونسبة مخاطرة صحيحة.';
-    return;
-  }
-
-  result.textContent =
-    'الحد الأقصى للخسارة: $' +
-    (balance * risk / 100).toFixed(2);
+function drawChart(a,lo,hi){const c=$('chart'),ctx=c.getContext('2d'),w=c.width,h=c.height;ctx.clearRect(0,0,w,h);ctx.strokeStyle='#24384d';ctx.lineWidth=1;for(let i=1;i<4;i++){ctx.beginPath();ctx.moveTo(0,h*i/4);ctx.lineTo(w,h*i/4);ctx.stroke();}ctx.strokeStyle='#38bdf8';ctx.lineWidth=3;ctx.beginPath();a.forEach((v,i)=>{let x=i*w/(a.length-1),y=h-12-(v-lo)/(hi-lo||1)*(h-24);i?ctx.lineTo(x,y):ctx.moveTo(x,y);});ctx.stroke();}
+function calcRisk(){
+ const bal=Math.max(0,Number($('balance').value)||0),pct=Math.max(0,Number($('risk').value)||0),cash=bal*pct/100;
+ $('riskcash').textContent=fmt(cash,2)+' USDT';
+ if(!latest||!latest.atr||!latest.p){$('stop').textContent='—';$('target').textContent='—';$('position').textContent='حجم المركز يُحسب بعد وصول البيانات.';return;}
+ const dist=latest.atr*1.5, isLong=latest.sig.includes('صعود'),isShort=latest.sig.includes('هبوط');
+ $('stop').textContent=fmt(isLong?latest.p-dist:isShort?latest.p+dist:latest.p-dist,latest.p<1?6:2);
+ $('target').textContent=fmt(isLong?latest.p+dist*2:isShort?latest.p-dist*2:latest.p+dist*2,latest.p<1?6:2);
+ const qty=dist>0?cash/dist:0;
+ $('position').textContent='حجم تقريبي وفق مسافة الوقف: '+fmt(qty,6)+' وحدة؛ القيمة الاسمية نحو '+fmt(qty*latest.p,2)+' USDT. هذا تقدير حسابي فقط ولا يشمل الرسوم أو الرافعة.';
+}
+$('refresh').addEventListener('click',load);$('coin').addEventListener('change',load);$('interval').addEventListener('change',load);$('balance').addEventListener('input',calcRisk);$('risk').addEventListener('input',calcRisk);
+$('notify').addEventListener('click',async()=>{if(!('Notification'in window)){$('notifyStatus').textContent='هذا المتصفح لا يدعم إشعارات الويب.';return;}let p=await Notification.requestPermission();notificationEnabled=p==='granted';$('notifyStatus').textContent=notificationEnabled?'تم تفعيل الإشعارات لهذه الصفحة.':'لم يتم السماح بالإشعارات.';$('notifyStatus').className='status '+(notificationEnabled?'ok':'');});
+load();timer=setInterval(load,60000);
+</script>
+<script>
+if ("serviceWorker" in navigator && (location.protocol === "https:" || location.hostname === "localhost")) {
+  window.addEventListener("load", () => navigator.serviceWorker.register("./sw.js").catch(err => console.warn("Service worker:", err)));
 }
 </script>
-</body>
-</html>
+</body></html>
