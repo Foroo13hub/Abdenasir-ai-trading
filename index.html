@@ -57,6 +57,8 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:18px 0}
 <div class="stat"><span class="small muted">RSI (14)</span><b id="rsi">—</b></div>
 <div class="stat"><span class="small muted">SMA 20</span><b id="sma20">—</b></div>
 <div class="stat"><span class="small muted">SMA 50</span><b id="sma50">—</b></div>
+<div class="stat"><span class="small muted">MACD</span><b id="macd">—</b></div>
+<div class="stat"><span class="small muted">ATR (14)</span><b id="atrval">—</b></div>
 </div>
 </div>
 <div class="card">
@@ -103,6 +105,8 @@ const fmt=(n,d=2)=>Number.isFinite(n)?n.toLocaleString('en-US',{minimumFractionD
 const symbol=()=> $('coin').value;
 function setStatus(msg,kind=''){ $('status').textContent=msg; $('status').className='status '+kind; }
 function sma(a,n){if(a.length<n)return NaN;return a.slice(-n).reduce((x,y)=>x+y,0)/n;}
+function emaSeries(a,n){let k=2/(n+1),e=a[0],out=[e];for(let i=1;i<a.length;i++){e=a[i]*k+e*(1-k);out.push(e);}return out;}
+function macdCalc(a){const e12=emaSeries(a,12),e26=emaSeries(a,26),line=a.map((_,i)=>e12[i]-e26[i]),sig=emaSeries(line,9);return {line:line.at(-1),signal:sig.at(-1),hist:line.at(-1)-sig.at(-1)};}
 function rsi(a,n=14){if(a.length<n+1)return NaN;let gain=0,loss=0;for(let i=a.length-n;i<a.length;i++){let d=a[i]-a[i-1];if(d>0)gain+=d;else loss-=d;}if(loss===0)return 100;return 100-100/(1+(gain/n)/(loss/n));}
 async function getJSON(url){const res=await fetch(url,{cache:'no-store'});if(!res.ok)throw new Error('HTTP '+res.status);return res.json();}
 async function load(){
@@ -122,16 +126,19 @@ async function load(){
   $('low').textContent=fmt(Number(ticker.lowPrice),p<1?6:2);
   $('volume').textContent=fmt(Number(ticker.quoteVolume)/1e6,2)+'M USDT';
   $('rsi').textContent=fmt(rv,1);$('sma20').textContent=fmt(s20,p<1?6:2);$('sma50').textContent=fmt(s50,p<1?6:2);
-  let sig='انتظار', desc='الاتجاه غير واضح بما يكفي؛ الأفضل عدم الاستعجال.';
-  if(p>s20&&s20>s50&&rv>=45&&rv<70){sig='صعود مبدئي';desc='السعر أعلى المتوسطات والاتجاه قصير المدى إيجابي، لكن يلزم تأكيد من حركة السعر.';}
-  else if(p<s20&&s20<s50&&rv>30&&rv<=55){sig='هبوط مبدئي';desc='السعر أسفل المتوسطات والاتجاه قصير المدى سلبي، لكن يلزم تأكيد من حركة السعر.';}
-  else if(rv>=70){sig='انتظار — RSI مرتفع';desc='الزخم مرتفع وقد يكون السعر ممتداً؛ لا تطارد الحركة.';}
-  else if(rv<=30){sig='انتظار — RSI منخفض';desc='الزخم منخفض؛ لا تفترض الارتداد دون تأكيد.';}
-  $('signal').textContent=sig;$('signal').className='signal '+(sig.includes('صعود')?'up':sig.includes('هبوط')?'down':'gold');$('summary').textContent=desc;
+  const em20=emaSeries(closes,20), em50=emaSeries(closes,50), e20=em20.at(-1), e50=em50.at(-1), mc=macdCalc(closes);
+  let score=0; score += p>e20?1:-1; score += e20>e50?1:-1; score += mc.hist>0?1:-1; score += rv>52?1:rv<48?-1:0;
+  let sig='انتظار', desc='المؤشرات غير متفقة بما يكفي؛ الأفضل انتظار فرصة أوضح.';
+  if(score>=3&&rv<70){sig='شراء مبدئي';desc='3 مؤشرات أو أكثر تميل للصعود (المتوسطات وMACD وRSI). انتظر تأكيد حركة السعر ولا تعتبرها ضماناً.';}
+  else if(score<=-3&&rv>30){sig='بيع مبدئي';desc='3 مؤشرات أو أكثر تميل للهبوط. البيع هنا إشارة تحليلية فقط، وليس أمراً بتنفيذ صفقة.';}
+  else if(rv>=70){desc='RSI مرتفع؛ لا تطارد السعر. انتظر تراجعاً أو تأكيداً جديداً.';}
+  else if(rv<=30){desc='RSI منخفض؛ لا تفترض الارتداد دون تأكيد.';}
+  $('signal').textContent=sig;$('signal').className='signal '+(sig.includes('شراء')?'up':sig.includes('بيع')?'down':'gold');$('summary').textContent=desc+' درجة توافق المؤشرات: '+score+'/4.';
+  $('macd').textContent=fmt(mc.hist,p<1?6:2);
   const recent=closes.slice(-60), lo=Math.min(...recent), hi=Math.max(...recent);drawChart(recent,lo,hi);
   const tr=[];for(let i=1;i<candles.length;i++){tr.push(Math.max(highs[i]-lows[i],Math.abs(highs[i]-closes[i-1]),Math.abs(lows[i]-closes[i-1])));}
   const atr=tr.slice(-14).reduce((a,b)=>a+b,0)/Math.min(14,tr.length);
-  latest={p,atr,sig,rv,closes};calcRisk();
+  $('atrval').textContent=fmt(atr,p<1?6:2);latest={p,atr,sig,rv,closes,score};calcRisk();
   if(notificationEnabled&&lastSignal&&sig!==lastSignal&&Notification.permission==='granted'){new Notification('Abdenasir Crypto AI',{body:s+' — '+sig+' على فريم '+int});}
   lastSignal=sig;
   setStatus('تم تحديث البيانات: '+new Date().toLocaleTimeString('ar'), 'ok');
@@ -142,14 +149,15 @@ async function load(){
 }
 function drawChart(a,lo,hi){const c=$('chart'),ctx=c.getContext('2d'),w=c.width,h=c.height;ctx.clearRect(0,0,w,h);ctx.strokeStyle='#24384d';ctx.lineWidth=1;for(let i=1;i<4;i++){ctx.beginPath();ctx.moveTo(0,h*i/4);ctx.lineTo(w,h*i/4);ctx.stroke();}ctx.strokeStyle='#38bdf8';ctx.lineWidth=3;ctx.beginPath();a.forEach((v,i)=>{let x=i*w/(a.length-1),y=h-12-(v-lo)/(hi-lo||1)*(h-24);i?ctx.lineTo(x,y):ctx.moveTo(x,y);});ctx.stroke();}
 function calcRisk(){
- const bal=Math.max(0,Number($('balance').value)||0),pct=Math.max(0,Number($('risk').value)||0),cash=bal*pct/100;
+ const bal=Math.max(0,Number($('balance').value)||0),pct=Math.min(5,Math.max(0,Number($('risk').value)||1)),cash=bal*pct/100;
  $('riskcash').textContent=fmt(cash,2)+' USDT';
  if(!latest||!latest.atr||!latest.p){$('stop').textContent='—';$('target').textContent='—';$('position').textContent='حجم المركز يُحسب بعد وصول البيانات.';return;}
- const dist=latest.atr*1.5, isLong=latest.sig.includes('صعود'),isShort=latest.sig.includes('هبوط');
- $('stop').textContent=fmt(isLong?latest.p-dist:isShort?latest.p+dist:latest.p-dist,latest.p<1?6:2);
- $('target').textContent=fmt(isLong?latest.p+dist*2:isShort?latest.p-dist*2:latest.p+dist*2,latest.p<1?6:2);
- const qty=dist>0?cash/dist:0;
- $('position').textContent='حجم تقريبي وفق مسافة الوقف: '+fmt(qty,6)+' وحدة؛ القيمة الاسمية نحو '+fmt(qty*latest.p,2)+' USDT. هذا تقدير حسابي فقط ولا يشمل الرسوم أو الرافعة.';
+ const p=latest.p, dist=latest.atr*1.5, isLong=latest.sig.includes('شراء'), isShort=latest.sig.includes('بيع');
+ if(!isLong&&!isShort){$('stop').textContent='انتظار الإشارة';$('target').textContent='انتظار الإشارة';$('position').textContent='لا توجد إشارة واضحة حالياً؛ لا تدخل الصفقة اعتماداً على مستويات آلية فقط.';return;}
+ const stop=isLong?p-dist:p+dist, target=isLong?p+2*dist:p-2*dist;
+ $('stop').textContent=fmt(stop,p<1?6:2);$('target').textContent=fmt(target,p<1?6:2);
+ const qtyRisk=dist>0?cash/dist:0, qtyBalance=p>0?bal/p:0, qty=Math.min(qtyRisk,qtyBalance), notional=qty*p, realRisk=qty*dist;
+ $('position').textContent='حجم المركز الأقصى دون رافعة: '+fmt(qty,6)+' وحدة؛ القيمة الاسمية: '+fmt(notional,2)+' USDT. الخسارة التقريبية عند الوقف: '+fmt(realRisk,2)+' USDT قبل الرسوم والانزلاق.'+(qtyBalance<qtyRisk?' تم تقييد الحجم حتى لا تتجاوز قيمة المركز رصيدك.':'')+' لا ينفّذ التطبيق أي صفقة.';
 }
 $('refresh').addEventListener('click',load);$('coin').addEventListener('change',load);$('interval').addEventListener('change',load);$('balance').addEventListener('input',calcRisk);$('risk').addEventListener('input',calcRisk);
 $('notify').addEventListener('click',async()=>{if(!('Notification'in window)){$('notifyStatus').textContent='هذا المتصفح لا يدعم إشعارات الويب.';return;}let p=await Notification.requestPermission();notificationEnabled=p==='granted';$('notifyStatus').textContent=notificationEnabled?'تم تفعيل الإشعارات لهذه الصفحة.':'لم يتم السماح بالإشعارات.';$('notifyStatus').className='status '+(notificationEnabled?'ok':'');});
