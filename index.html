@@ -4,9 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#08111d">
-<link rel="manifest" href="./manifest.json">
-<link rel="icon" href="./icon.svg" type="image/svg+xml">
-<title>Abdenasir Crypto AI</title>
+<link rel="manifest" href="manifest.json">
+<title>Abdenasir Crypto AI Pro — Trade Plan</title>
 <style>
 :root{--bg:#08111d;--panel:#101c2b;--panel2:#142337;--line:#263a51;--text:#e7eef8;--muted:#9fb0c5;--blue:#38bdf8;--green:#21c58e;--red:#ff647c;--gold:#f5bf4f}
 *{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at top,#102238 0,#08111d 42%);color:var(--text);font-family:Arial,"Noto Sans Arabic",sans-serif;padding:16px;line-height:1.65}
@@ -27,8 +26,8 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:18px 0}
 <div class="wrap">
 <header>
 <h1>Abdenasir Crypto AI</h1>
-<p>لوحة تحليل العملات الرقمية وإدارة المخاطر</p>
-<span class="pill">تحليل تعليمي — لا ينفّذ صفقات</span>
+<p>تحليل فني متعدد الإشارات وخطة صفقة كاملة</p>
+<span class="pill">إصدار Pro • تحليل تعليمي — لا ينفّذ صفقات</span>
 </header>
 
 <section class="toolbar card">
@@ -57,28 +56,26 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:18px 0}
 <div class="stat"><span class="small muted">RSI (14)</span><b id="rsi">—</b></div>
 <div class="stat"><span class="small muted">SMA 20</span><b id="sma20">—</b></div>
 <div class="stat"><span class="small muted">SMA 50</span><b id="sma50">—</b></div>
-<div class="stat"><span class="small muted">MACD</span><b id="macd">—</b></div>
-<div class="stat"><span class="small muted">ATR (14)</span><b id="atrval">—</b></div>
 </div>
+</div>
+<div class="card" id="tradePlanCard" style="grid-column:1/-1">
+<h2>خطة الصفقة المقترحة</h2>
+<div class="signal gold" id="planSide">بانتظار التحليل</div>
+<p id="planReason" class="muted">ستظهر نقطة الدخول ووقف الخسارة والأهداف بعد تحميل بيانات السوق وتوافق الشروط.</p>
+<div class="stats" style="margin-top:12px">
+<div class="stat"><span class="small muted">الدخول المرجعي</span><b id="entry">—</b></div>
+<div class="stat"><span class="small muted">وقف الخسارة SL</span><b id="planStop">—</b></div>
+<div class="stat"><span class="small muted">الهدف الأول TP1 (1R)</span><b id="tp1">—</b></div>
+<div class="stat"><span class="small muted">الهدف الثاني TP2 (2R)</span><b id="tp2">—</b></div>
+<div class="stat"><span class="small muted">الهدف الثالث TP3 (3R)</span><b id="tp3">—</b></div>
+<div class="stat"><span class="small muted">العائد/المخاطرة إلى TP2</span><b id="rr">—</b></div>
+</div>
+<p class="small muted" id="planQuality">الخطة ليست إشارة تنفيذ تلقائية.</p>
 </div>
 <div class="card">
 <h2>حركة السعر — آخر الشموع</h2>
 <canvas id="chart" width="800" height="220"></canvas>
 <p class="small muted">رسم مبسّط لإغلاقات الشموع، وليس بديلاً عن مخطط احترافي.</p>
-</div>
-<div class="card" id="tradePlan">
-<h2>خطة الصفقة المقترحة</h2>
-<div class="pill" id="tradeDirection">بانتظار إشارة واضحة</div>
-<div class="stats" style="margin-top:10px">
-<div class="stat"><span class="small muted">نقطة الدخول</span><b id="entryPrice">—</b></div>
-<div class="stat"><span class="small muted">وقف الخسارة (SL)</span><b id="tradeStop">—</b></div>
-<div class="stat"><span class="small muted">العائد/المخاطرة</span><b id="rrRatio">—</b></div>
-<div class="stat"><span class="small muted">الهدف الأول (TP1)</span><b id="tp1">—</b></div>
-<div class="stat"><span class="small muted">الهدف الثاني (TP2)</span><b id="tp2">—</b></div>
-<div class="stat"><span class="small muted">الهدف الثالث (TP3)</span><b id="tp3">—</b></div>
-</div>
-<p id="tradeReason" class="muted">ستظهر الخطة عند توفر بيانات وإشارة شراء أو بيع واضحة.</p>
-<p class="small muted">هذه مستويات تقديرية محسوبة من السعر الحالي وATR؛ قد تتغير بسرعة، وليست توصية مضمونة أو أمراً بتنفيذ صفقة.</p>
 </div>
 <div class="card">
 <h2>خطة إدارة المخاطر</h2>
@@ -102,15 +99,15 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:18px 0}
 <div class="card">
 <h2>قواعد قراءة الإشارة</h2>
 <ul class="list">
-<li><span class="up">شراء مبدئي</span> — توافق 3 مؤشرات أو أكثر من المتوسطات وMACD وRSI، مع RSI أقل من 70.</li>
-<li><span class="down">بيع مبدئي</span> — توافق 3 مؤشرات أو أكثر تميل للهبوط، مع RSI أعلى من 30.</li>
+<li><span class="up">صعود مبدئي</span> — السعر فوق SMA20 وSMA20 فوق SMA50 وRSI غير مرتفع بشدة.</li>
+<li><span class="down">هبوط مبدئي</span> — السعر تحت SMA20 وSMA20 تحت SMA50 وRSI غير منخفض بشدة.</li>
 <li><span class="gold">انتظار</span> — الإشارات متضاربة أو السوق في منطقة قد تكون ممتدة.</li>
 </ul>
-<p class="small muted">الإشارة مبنية على قواعد فنية آلية وليست ذكاءً اصطناعياً تنبؤياً، ولا تضمن الربح. اختبرها قبل التداول الحقيقي.</p>
+<p class="small muted">هذه قواعد فنية آلية مبسطة وليست ذكاءً اصطناعياً تنبؤياً ولا تضمن الربح. الخطة المقترحة تقديرية وتحتاج مراجعة الشارت.</p>
 </div>
 </section>
 <div class="notice">تنبيه مهم: الأسعار تأتي من واجهة Binance العامة وقد لا تعمل على بعض الشبكات. لا توجد مفاتيح API أو ربط حساب تداول هنا، ولا تُرسل أوامر شراء/بيع. راجع السعر والانزلاق والرسوم بنفسك قبل أي قرار.</div>
-<footer>Abdenasir Crypto AI • نسخة أولية تعمل عبر اتصال الإنترنت</footer>
+<footer>Abdenasir Crypto AI Pro • بيانات عامة • لا ينفّذ أوامر تداول</footer>
 </div>
 <script>
 const $=id=>document.getElementById(id);
@@ -119,8 +116,6 @@ const fmt=(n,d=2)=>Number.isFinite(n)?n.toLocaleString('en-US',{minimumFractionD
 const symbol=()=> $('coin').value;
 function setStatus(msg,kind=''){ $('status').textContent=msg; $('status').className='status '+kind; }
 function sma(a,n){if(a.length<n)return NaN;return a.slice(-n).reduce((x,y)=>x+y,0)/n;}
-function emaSeries(a,n){let k=2/(n+1),e=a[0],out=[e];for(let i=1;i<a.length;i++){e=a[i]*k+e*(1-k);out.push(e);}return out;}
-function macdCalc(a){const e12=emaSeries(a,12),e26=emaSeries(a,26),line=a.map((_,i)=>e12[i]-e26[i]),sig=emaSeries(line,9);return {line:line.at(-1),signal:sig.at(-1),hist:line.at(-1)-sig.at(-1)};}
 function rsi(a,n=14){if(a.length<n+1)return NaN;let gain=0,loss=0;for(let i=a.length-n;i<a.length;i++){let d=a[i]-a[i-1];if(d>0)gain+=d;else loss-=d;}if(loss===0)return 100;return 100-100/(1+(gain/n)/(loss/n));}
 async function getJSON(url){const res=await fetch(url,{cache:'no-store'});if(!res.ok)throw new Error('HTTP '+res.status);return res.json();}
 async function load(){
@@ -140,22 +135,18 @@ async function load(){
   $('low').textContent=fmt(Number(ticker.lowPrice),p<1?6:2);
   $('volume').textContent=fmt(Number(ticker.quoteVolume)/1e6,2)+'M USDT';
   $('rsi').textContent=fmt(rv,1);$('sma20').textContent=fmt(s20,p<1?6:2);$('sma50').textContent=fmt(s50,p<1?6:2);
-  const em20=emaSeries(closes,20), em50=emaSeries(closes,50), e20=em20.at(-1), e50=em50.at(-1), mc=macdCalc(closes);
-  let score=0; score += p>e20?1:-1; score += e20>e50?1:-1; score += mc.hist>0?1:-1; score += rv>52?1:rv<48?-1:0;
-  let sig='انتظار', desc='المؤشرات غير متفقة بما يكفي؛ الأفضل انتظار فرصة أوضح.';
-  if(score>=3&&rv<70){sig='شراء مبدئي';desc='3 مؤشرات أو أكثر تميل للصعود (المتوسطات وMACD وRSI). انتظر تأكيد حركة السعر ولا تعتبرها ضماناً.';}
-  else if(score<=-3&&rv>30){sig='بيع مبدئي';desc='3 مؤشرات أو أكثر تميل للهبوط. البيع هنا إشارة تحليلية فقط، وليس أمراً بتنفيذ صفقة.';}
-  else if(rv>=70){desc='RSI مرتفع؛ لا تطارد السعر. انتظر تراجعاً أو تأكيداً جديداً.';}
-  else if(rv<=30){desc='RSI منخفض؛ لا تفترض الارتداد دون تأكيد.';}
-  $('signal').textContent=sig;$('signal').className='signal '+(sig.includes('شراء')?'up':sig.includes('بيع')?'down':'gold');$('summary').textContent=desc+' درجة توافق المؤشرات: '+score+'/4.';
-  $('macd').textContent=fmt(mc.hist,p<1?6:2);
+  let sig='انتظار', desc='الاتجاه غير واضح بما يكفي؛ الأفضل عدم الاستعجال.';
+  if(p>s20&&s20>s50&&rv>=45&&rv<70){sig='صعود مبدئي';desc='السعر أعلى المتوسطات والاتجاه قصير المدى إيجابي، لكن يلزم تأكيد من حركة السعر.';}
+  else if(p<s20&&s20<s50&&rv>30&&rv<=55){sig='هبوط مبدئي';desc='السعر أسفل المتوسطات والاتجاه قصير المدى سلبي، لكن يلزم تأكيد من حركة السعر.';}
+  else if(rv>=70){sig='انتظار — RSI مرتفع';desc='الزخم مرتفع وقد يكون السعر ممتداً؛ لا تطارد الحركة.';}
+  else if(rv<=30){sig='انتظار — RSI منخفض';desc='الزخم منخفض؛ لا تفترض الارتداد دون تأكيد.';}
+  $('signal').textContent=sig;$('signal').className='signal '+(sig.includes('صعود')?'up':sig.includes('هبوط')?'down':'gold');$('summary').textContent=desc;
   const recent=closes.slice(-60), lo=Math.min(...recent), hi=Math.max(...recent);drawChart(recent,lo,hi);
   const tr=[];for(let i=1;i<candles.length;i++){tr.push(Math.max(highs[i]-lows[i],Math.abs(highs[i]-closes[i-1]),Math.abs(lows[i]-closes[i-1])));}
   const atr=tr.slice(-14).reduce((a,b)=>a+b,0)/Math.min(14,tr.length);
-  $('atrval').textContent=fmt(atr,p<1?6:2);latest={p,atr,sig,rv,closes,score};calcRisk();
-  if(notificationEnabled&&lastSignal&&sig!==lastSignal&&Notification.permission==='granted'){
-    if('serviceWorker' in navigator){navigator.serviceWorker.ready.then(reg=>reg.showNotification('Abdenasir Crypto AI',{body:s+' — '+sig+' على فريم '+int,icon:'./icon.svg',tag:'crypto-signal'})).catch(()=>{});}
-  }
+  latest={p,atr,sig,rv,closes,s20,s50,int,highs,lows};
+  calcRisk();renderTradePlan();
+  if(notificationEnabled&&lastSignal&&sig!==lastSignal&&Notification.permission==='granted'){new Notification('Abdenasir Crypto AI',{body:s+' — '+sig+' على فريم '+int});}
   lastSignal=sig;
   setStatus('تم تحديث البيانات: '+new Date().toLocaleTimeString('ar'), 'ok');
  }catch(e){
@@ -164,28 +155,36 @@ async function load(){
  }finally{$('refresh').disabled=false;}
 }
 function drawChart(a,lo,hi){const c=$('chart'),ctx=c.getContext('2d'),w=c.width,h=c.height;ctx.clearRect(0,0,w,h);ctx.strokeStyle='#24384d';ctx.lineWidth=1;for(let i=1;i<4;i++){ctx.beginPath();ctx.moveTo(0,h*i/4);ctx.lineTo(w,h*i/4);ctx.stroke();}ctx.strokeStyle='#38bdf8';ctx.lineWidth=3;ctx.beginPath();a.forEach((v,i)=>{let x=i*w/(a.length-1),y=h-12-(v-lo)/(hi-lo||1)*(h-24);i?ctx.lineTo(x,y):ctx.moveTo(x,y);});ctx.stroke();}
+function renderTradePlan(){
+ const x=latest;if(!x||!x.atr||!Number.isFinite(x.atr)){return;}
+ const isLong=x.sig.includes('صعود'),isShort=x.sig.includes('هبوط'),digits=x.p<1?6:2;
+ const side=$('planSide'),reason=$('planReason'),quality=$('planQuality');
+ if(!isLong&&!isShort){
+  side.textContent='لا توجد صفقة — انتظار';side.className='signal gold';
+  reason.textContent='شروط الاتجاه غير مكتملة أو الزخم متطرف. الأفضل انتظار إغلاق شمعة وتأكيد جديد بدل الدخول القسري.';
+  ['entry','planStop','tp1','tp2','tp3','rr'].forEach(id=>$(id).textContent='—');
+  quality.textContent='لا تدخل صفقة عند ظهور انتظار. المستويات لا تُعرض إلا عند وجود اتجاه مبدئي.';return;
+ }
+ const entry=x.p, dist=Math.max(x.atr*1.5,entry*0.0015), stop=isLong?entry-dist:entry+dist;
+ const t1=isLong?entry+dist:entry-dist,t2=isLong?entry+2*dist:entry-2*dist,t3=isLong?entry+3*dist:entry-3*dist;
+ side.textContent=isLong?'شراء مبدئي — LONG':'بيع مبدئي — SHORT';side.className='signal '+(isLong?'up':'down');
+ reason.textContent='الدخول المرجعي هو السعر الحالي وقت التحديث، بشرط تأكيد حركة السعر وعدم مطاردة شمعة قوية. الوقف محسوب من ATR × 1.5؛ أعد التحديث قبل أي قرار.';
+ $('entry').textContent=fmt(entry,digits)+' USDT';$('planStop').textContent=fmt(stop,digits)+' USDT';$('tp1').textContent=fmt(t1,digits)+' USDT';$('tp2').textContent=fmt(t2,digits)+' USDT';$('tp3').textContent=fmt(t3,digits)+' USDT';$('rr').textContent='1 : 2';
+ quality.textContent='الاتجاه مبدئي فقط؛ ليس تأكيداً مستقلاً. لا توجد بيانات دفتر أوامر أو أخبار ضمن هذا النموذج. حجم المركز يظل محدوداً حسب نسبة المخاطرة المختارة.';
+}
 function calcRisk(){
- const bal=Math.max(0,Number($('balance').value)||0),pct=Math.min(5,Math.max(0,Number($('risk').value)||1)),cash=bal*pct/100;
+ const bal=Math.max(0,Number($('balance').value)||0),pct=Math.max(0,Number($('risk').value)||0),cash=bal*pct/100;
  $('riskcash').textContent=fmt(cash,2)+' USDT';
- const clearPlan=(msg)=>{['entryPrice','tradeStop','tp1','tp2','tp3','rrRatio'].forEach(id=>$(id).textContent='—');$('tradeDirection').textContent='بانتظار إشارة واضحة';$('tradeDirection').className='pill gold';$('tradeReason').textContent=msg;};
- if(!latest||!latest.atr||!latest.p){$('stop').textContent='—';$('target').textContent='—';$('position').textContent='حجم المركز يُحسب بعد وصول البيانات.';clearPlan('ستظهر الخطة عند توفر بيانات السوق.');return;}
- const p=latest.p, dist=latest.atr*1.5, isLong=latest.sig.includes('شراء'), isShort=latest.sig.includes('بيع'), digs=p<1?6:2;
- if(!isLong&&!isShort){$('stop').textContent='انتظار الإشارة';$('target').textContent='انتظار الإشارة';$('position').textContent='لا توجد إشارة واضحة حالياً؛ تجنّب الدخول حتى تتفق المؤشرات.';clearPlan('الإشارة الحالية انتظار؛ لن نقترح دخولاً عندما تكون المؤشرات متضاربة.');return;}
- const sign=isLong?1:-1, stop=p-sign*dist, t1=p+sign*dist, t2=p+sign*dist*2, t3=p+sign*dist*3;
- $('stop').textContent=fmt(stop,digs);$('target').textContent=fmt(t2,digs);
- $('entryPrice').textContent=fmt(p,digs);$('tradeStop').textContent=fmt(stop,digs);$('tp1').textContent=fmt(t1,digs);$('tp2').textContent=fmt(t2,digs);$('tp3').textContent=fmt(t3,digs);$('rrRatio').textContent='1:1 / 1:2 / 1:3';
- $('tradeDirection').textContent=isLong?'شراء مبدئي — LONG':'بيع مبدئي — SHORT';$('tradeDirection').className='pill '+(isLong?'up':'down');
- $('tradeReason').textContent='سبب الإشارة: '+(isLong?'توافق المؤشرات يميل للصعود':'توافق المؤشرات يميل للهبوط')+'؛ درجة التوافق '+latest.score+'/4 وRSI '+fmt(latest.rv,1)+'. الدخول محسوب من السعر الحالي، ووقف الخسارة بمسافة 1.5×ATR.';
- const qtyRisk=dist>0?cash/dist:0, qtyBalance=p>0?bal/p:0, qty=Math.min(qtyRisk,qtyBalance), notional=qty*p, realRisk=qty*dist;
- $('position').textContent='حجم المركز الأقصى دون رافعة (مقيّد برصيدك): '+fmt(qty,6)+' وحدة؛ القيمة الاسمية: '+fmt(notional,2)+' USDT. الخسارة المقدّرة عند وقف الخسارة: '+fmt(realRisk,2)+' USDT قبل الرسوم والانزلاق.'+(qtyBalance<qtyRisk?' تم تقييد الحجم حتى لا تتجاوز قيمة المركز رصيدك.':'')+' لا ينفّذ التطبيق أي صفقة.';
+ if(!latest||!latest.atr||!latest.p){$('stop').textContent='—';$('target').textContent='—';$('position').textContent='حجم المركز يُحسب بعد وصول البيانات.';return;}
+ const dist=Math.max(latest.atr*1.5,latest.p*0.0015), isLong=latest.sig.includes('صعود'),isShort=latest.sig.includes('هبوط');
+ $('stop').textContent=fmt(isLong?latest.p-dist:isShort?latest.p+dist:NaN,latest.p<1?6:2);
+ $('target').textContent=fmt(isLong?latest.p+dist*2:isShort?latest.p-dist*2:NaN,latest.p<1?6:2);
+ const qty=dist>0?cash/dist:0;
+ $('position').textContent='حجم تقريبي وفق مسافة الوقف: '+fmt(qty,6)+' وحدة؛ القيمة الاسمية نحو '+fmt(qty*latest.p,2)+' USDT. هذا تقدير حسابي فقط ولا يشمل الرسوم أو الرافعة.';
 }
 $('refresh').addEventListener('click',load);$('coin').addEventListener('change',load);$('interval').addEventListener('change',load);$('balance').addEventListener('input',calcRisk);$('risk').addEventListener('input',calcRisk);
 $('notify').addEventListener('click',async()=>{if(!('Notification'in window)){$('notifyStatus').textContent='هذا المتصفح لا يدعم إشعارات الويب.';return;}let p=await Notification.requestPermission();notificationEnabled=p==='granted';$('notifyStatus').textContent=notificationEnabled?'تم تفعيل الإشعارات لهذه الصفحة.':'لم يتم السماح بالإشعارات.';$('notifyStatus').className='status '+(notificationEnabled?'ok':'');});
 load();timer=setInterval(load,60000);
 </script>
-<script>
-if ("serviceWorker" in navigator && (location.protocol === "https:" || location.hostname === "localhost")) {
-  window.addEventListener("load", () => navigator.serviceWorker.register("./sw.js").catch(err => console.warn("Service worker:", err)));
-}
-</script>
+<script>if("serviceWorker" in navigator){window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js").catch(()=>{}));}</script>
 </body></html>

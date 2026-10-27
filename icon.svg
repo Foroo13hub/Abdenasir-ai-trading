@@ -1,6 +1,1 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-<rect width="512" height="512" rx="112" fill="#08111d"/>
-<path d="M90 350 L175 265 L235 310 L365 150" fill="none" stroke="#38bdf8" stroke-width="28" stroke-linecap="round" stroke-linejoin="round"/>
-<path d="M305 150 H365 V210" fill="none" stroke="#21c58e" stroke-width="28" stroke-linecap="round" stroke-linejoin="round"/>
-<circle cx="90" cy="350" r="18" fill="#21c58e"/><circle cx="175" cy="265" r="18" fill="#38bdf8"/><circle cx="235" cy="310" r="18" fill="#38bdf8"/>
-</svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><rect width="512" height="512" rx="110" fill="#08111d"/><path d="M75 350 L160 260 L225 300 L350 140 L430 190" fill="none" stroke="#38bdf8" stroke-width="28" stroke-linecap="round" stroke-linejoin="round"/><circle cx="350" cy="140" r="22" fill="#21c58e"/><text x="256" y="435" font-family="Arial" font-size="54" font-weight="bold" fill="#e7eef8" text-anchor="middle">ACAI</text></svg>
