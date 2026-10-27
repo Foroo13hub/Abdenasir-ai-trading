@@ -4,7 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#08111d">
-<link rel="manifest" href="manifest.json">
+<link rel="manifest" href="./manifest.json">
+<link rel="icon" href="./icon.svg" type="image/svg+xml">
 <title>Abdenasir Crypto AI Pro — Trade Plan</title>
 <style>
 :root{--bg:#08111d;--panel:#101c2b;--panel2:#142337;--line:#263a51;--text:#e7eef8;--muted:#9fb0c5;--blue:#38bdf8;--green:#21c58e;--red:#ff647c;--gold:#f5bf4f}
@@ -58,6 +59,20 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:18px 0}
 <div class="stat"><span class="small muted">SMA 50</span><b id="sma50">—</b></div>
 </div>
 </div>
+<div class="card" style="grid-column:1/-1">
+<h2>تأكيد الاتجاه متعدد الأطر</h2>
+<div class="stats">
+<div class="stat"><span class="small muted">15 دقيقة</span><b id="tf15">—</b></div>
+<div class="stat"><span class="small muted">ساعة</span><b id="tf1h">—</b></div>
+<div class="stat"><span class="small muted">4 ساعات</span><b id="tf4h">—</b></div>
+</div>
+<p class="muted" id="mtfSummary">سيتم فحص توافق الاتجاهات قبل تقييم فرصة التداول.</p>
+<div class="stats">
+<div class="stat"><span class="small muted">قوة الإشارة التقديرية</span><b id="strength">—</b></div>
+<div class="stat"><span class="small muted">دعم قريب</span><b id="support">—</b></div>
+<div class="stat"><span class="small muted">مقاومة قريبة</span><b id="resistance">—</b></div>
+</div>
+</div>
 <div class="card" id="tradePlanCard" style="grid-column:1/-1">
 <h2>خطة الصفقة المقترحة</h2>
 <div class="signal gold" id="planSide">بانتظار التحليل</div>
@@ -103,7 +118,7 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:18px 0}
 <li><span class="down">هبوط مبدئي</span> — السعر تحت SMA20 وSMA20 تحت SMA50 وRSI غير منخفض بشدة.</li>
 <li><span class="gold">انتظار</span> — الإشارات متضاربة أو السوق في منطقة قد تكون ممتدة.</li>
 </ul>
-<p class="small muted">هذه قواعد فنية آلية مبسطة وليست ذكاءً اصطناعياً تنبؤياً ولا تضمن الربح. الخطة المقترحة تقديرية وتحتاج مراجعة الشارت.</p>
+<p class="small muted">تمت إضافة فلتر توافق 15 دقيقة/ساعة/4 ساعات، وقوة تقديرية، ودعم/مقاومة من آخر 30 شمعة. هذه قواعد فنية آلية مبسطة وليست ذكاءً اصطناعياً تنبؤياً ولا تضمن الربح. الخطة المقترحة تقديرية وتحتاج مراجعة الشارت.</p>
 </div>
 </section>
 <div class="notice">تنبيه مهم: الأسعار تأتي من واجهة Binance العامة وقد لا تعمل على بعض الشبكات. لا توجد مفاتيح API أو ربط حساب تداول هنا، ولا تُرسل أوامر شراء/بيع. راجع السعر والانزلاق والرسوم بنفسك قبل أي قرار.</div>
@@ -122,9 +137,12 @@ async function load(){
  $('refresh').disabled=true;setStatus('جارٍ تحميل بيانات السوق…');
  try{
   const s=symbol(), int=$('interval').value;
-  const [ticker, candles]=await Promise.all([
+  const [ticker, candles, c15, c1h, c4h]=await Promise.all([
    getJSON('https://api.binance.com/api/v3/ticker/24hr?symbol='+s),
-   getJSON('https://api.binance.com/api/v3/klines?symbol='+s+'&interval='+int+'&limit=100')
+   getJSON('https://api.binance.com/api/v3/klines?symbol='+s+'&interval='+int+'&limit=100'),
+   getJSON('https://api.binance.com/api/v3/klines?symbol='+s+'&interval=15m&limit=100'),
+   getJSON('https://api.binance.com/api/v3/klines?symbol='+s+'&interval=1h&limit=100'),
+   getJSON('https://api.binance.com/api/v3/klines?symbol='+s+'&interval=4h&limit=100')
   ]);
   const closes=candles.map(c=>Number(c[4])), highs=candles.map(c=>Number(c[2])), lows=candles.map(c=>Number(c[3]));
   const p=Number(ticker.lastPrice), ch=Number(ticker.priceChangePercent), s20=sma(closes,20), s50=sma(closes,50), rv=rsi(closes);
@@ -135,16 +153,25 @@ async function load(){
   $('low').textContent=fmt(Number(ticker.lowPrice),p<1?6:2);
   $('volume').textContent=fmt(Number(ticker.quoteVolume)/1e6,2)+'M USDT';
   $('rsi').textContent=fmt(rv,1);$('sma20').textContent=fmt(s20,p<1?6:2);$('sma50').textContent=fmt(s50,p<1?6:2);
+  function trendFrom(cs){const a=cs.map(c=>Number(c[4]));const q=sma(a,20),w=sma(a,50),r=rsi(a);const last=a[a.length-1];if(last>q&&q>w&&r>=45&&r<70)return 'صعود';if(last<q&&q<w&&r>30&&r<=55)return 'هبوط';return 'محايد';}
+  const t15=trendFrom(c15),t1h=trendFrom(c1h),t4h=trendFrom(c4h), selectedTrend=trendFrom(candles);
+  $('tf15').textContent=t15;$('tf1h').textContent=t1h;$('tf4h').textContent=t4h;
+  $('tf15').className=t15==='صعود'?'up':t15==='هبوط'?'down':'gold';$('tf1h').className=t1h==='صعود'?'up':t1h==='هبوط'?'down':'gold';$('tf4h').className=t4h==='صعود'?'up':t4h==='هبوط'?'down':'gold';
   let sig='انتظار', desc='الاتجاه غير واضح بما يكفي؛ الأفضل عدم الاستعجال.';
-  if(p>s20&&s20>s50&&rv>=45&&rv<70){sig='صعود مبدئي';desc='السعر أعلى المتوسطات والاتجاه قصير المدى إيجابي، لكن يلزم تأكيد من حركة السعر.';}
-  else if(p<s20&&s20<s50&&rv>30&&rv<=55){sig='هبوط مبدئي';desc='السعر أسفل المتوسطات والاتجاه قصير المدى سلبي، لكن يلزم تأكيد من حركة السعر.';}
+  if(selectedTrend==='صعود'&&t1h==='صعود'&&t4h!=='هبوط'){sig='صعود مبدئي';desc='اتجاه الإطار المختار والساعة متوافقان صعوداً، ولا يوجد تعارض هابط على 4 ساعات. انتظر تأكيد حركة السعر.';}
+  else if(selectedTrend==='هبوط'&&t1h==='هبوط'&&t4h!=='صعود'){sig='هبوط مبدئي';desc='اتجاه الإطار المختار والساعة متوافقان هبوطاً، ولا يوجد تعارض صاعد على 4 ساعات. انتظر تأكيد حركة السعر.';}
   else if(rv>=70){sig='انتظار — RSI مرتفع';desc='الزخم مرتفع وقد يكون السعر ممتداً؛ لا تطارد الحركة.';}
   else if(rv<=30){sig='انتظار — RSI منخفض';desc='الزخم منخفض؛ لا تفترض الارتداد دون تأكيد.';}
+  else {desc='الأطر الزمنية غير متوافقة بما يكفي؛ الأفضل الانتظار وعدم فرض صفقة.';}
+  $('mtfSummary').textContent='الإطار المختار: '+selectedTrend+'؛ توافق 15د/1س/4س يُستخدم كفلتر، وليس ضماناً.';
+  const recentHigh=Math.max(...candles.slice(-30).map(c=>Number(c[2]))), recentLow=Math.min(...candles.slice(-30).map(c=>Number(c[3])));
+  $('support').textContent=fmt(recentLow,p<1?6:2);$('resistance').textContent=fmt(recentHigh,p<1?6:2);
+  const aligned=(t15===t1h?1:0)+(t1h===t4h?1:0)+(selectedTrend===t1h?1:0);$('strength').textContent=Math.round(aligned/3*100)+'% (تقديري)';
   $('signal').textContent=sig;$('signal').className='signal '+(sig.includes('صعود')?'up':sig.includes('هبوط')?'down':'gold');$('summary').textContent=desc;
   const recent=closes.slice(-60), lo=Math.min(...recent), hi=Math.max(...recent);drawChart(recent,lo,hi);
   const tr=[];for(let i=1;i<candles.length;i++){tr.push(Math.max(highs[i]-lows[i],Math.abs(highs[i]-closes[i-1]),Math.abs(lows[i]-closes[i-1])));}
   const atr=tr.slice(-14).reduce((a,b)=>a+b,0)/Math.min(14,tr.length);
-  latest={p,atr,sig,rv,closes,s20,s50,int,highs,lows};
+  latest={p,atr,sig,rv,closes,s20,s50,int,highs,lows,t15,t1h,t4h,selectedTrend};
   calcRisk();renderTradePlan();
   if(notificationEnabled&&lastSignal&&sig!==lastSignal&&Notification.permission==='granted'){new Notification('Abdenasir Crypto AI',{body:s+' — '+sig+' على فريم '+int});}
   lastSignal=sig;
@@ -170,7 +197,7 @@ function renderTradePlan(){
  side.textContent=isLong?'شراء مبدئي — LONG':'بيع مبدئي — SHORT';side.className='signal '+(isLong?'up':'down');
  reason.textContent='الدخول المرجعي هو السعر الحالي وقت التحديث، بشرط تأكيد حركة السعر وعدم مطاردة شمعة قوية. الوقف محسوب من ATR × 1.5؛ أعد التحديث قبل أي قرار.';
  $('entry').textContent=fmt(entry,digits)+' USDT';$('planStop').textContent=fmt(stop,digits)+' USDT';$('tp1').textContent=fmt(t1,digits)+' USDT';$('tp2').textContent=fmt(t2,digits)+' USDT';$('tp3').textContent=fmt(t3,digits)+' USDT';$('rr').textContent='1 : 2';
- quality.textContent='الاتجاه مبدئي فقط؛ ليس تأكيداً مستقلاً. لا توجد بيانات دفتر أوامر أو أخبار ضمن هذا النموذج. حجم المركز يظل محدوداً حسب نسبة المخاطرة المختارة.';
+ quality.textContent='الفلتر متعدد الأطر متوافق جزئياً؛ الاتجاه مبدئي وليس تأكيداً مستقلاً. لا توجد بيانات دفتر أوامر أو أخبار ضمن هذا النموذج. لا تدخل إذا تعارضت الأطر أو كان السعر بعيداً عن مستوى منطقي.';
 }
 function calcRisk(){
  const bal=Math.max(0,Number($('balance').value)||0),pct=Math.max(0,Number($('risk').value)||0),cash=bal*pct/100;
@@ -186,5 +213,5 @@ $('refresh').addEventListener('click',load);$('coin').addEventListener('change',
 $('notify').addEventListener('click',async()=>{if(!('Notification'in window)){$('notifyStatus').textContent='هذا المتصفح لا يدعم إشعارات الويب.';return;}let p=await Notification.requestPermission();notificationEnabled=p==='granted';$('notifyStatus').textContent=notificationEnabled?'تم تفعيل الإشعارات لهذه الصفحة.':'لم يتم السماح بالإشعارات.';$('notifyStatus').className='status '+(notificationEnabled?'ok':'');});
 load();timer=setInterval(load,60000);
 </script>
-<script>if("serviceWorker" in navigator){window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js").catch(()=>{}));}</script>
+<script>if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));}</script>
 </body></html>

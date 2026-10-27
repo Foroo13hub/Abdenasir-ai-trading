@@ -1,13 +1,8 @@
 {
-  "name": "Abdenasir Crypto AI Pro",
+  "name": "Abdenasir Crypto AI Pro Final",
   "short_name": "Crypto AI Pro",
-  "description": "تحليل فني للعملات الرقمية وخطة دخول ووقف وأهداف وإدارة مخاطر",
-  "lang": "ar",
-  "dir": "rtl",
-  "start_url": "./",
-  "scope": "./",
-  "display": "standalone",
-  "background_color": "#08111d",
-  "theme_color": "#08111d",
+  "description": "تحليل فني متعدد الأطر وخطة صفقة وإدارة مخاطر",
+  "lang": "ar", "dir": "rtl", "start_url": "./", "scope": "./",
+  "display": "standalone", "background_color": "#08111d", "theme_color": "#08111d",
   "icons": [{"src":"icon.svg","sizes":"any","type":"image/svg+xml","purpose":"any maskable"}]
 }
