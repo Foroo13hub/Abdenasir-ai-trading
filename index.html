@@ -139,7 +139,9 @@ async function load(){
   const tr=[];for(let i=1;i<candles.length;i++){tr.push(Math.max(highs[i]-lows[i],Math.abs(highs[i]-closes[i-1]),Math.abs(lows[i]-closes[i-1])));}
   const atr=tr.slice(-14).reduce((a,b)=>a+b,0)/Math.min(14,tr.length);
   $('atrval').textContent=fmt(atr,p<1?6:2);latest={p,atr,sig,rv,closes,score};calcRisk();
-  if(notificationEnabled&&lastSignal&&sig!==lastSignal&&Notification.permission==='granted'){new Notification('Abdenasir Crypto AI',{body:s+' — '+sig+' على فريم '+int});}
+  if(notificationEnabled&&lastSignal&&sig!==lastSignal&&Notification.permission==='granted'){
+    if('serviceWorker' in navigator){navigator.serviceWorker.ready.then(reg=>reg.showNotification('Abdenasir Crypto AI',{body:s+' — '+sig+' على فريم '+int,icon:'./icon.svg',tag:'crypto-signal'})).catch(()=>{});}
+  }
   lastSignal=sig;
   setStatus('تم تحديث البيانات: '+new Date().toLocaleTimeString('ar'), 'ok');
  }catch(e){
