@@ -66,6 +66,20 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:18px 0}
 <canvas id="chart" width="800" height="220"></canvas>
 <p class="small muted">رسم مبسّط لإغلاقات الشموع، وليس بديلاً عن مخطط احترافي.</p>
 </div>
+<div class="card" id="tradePlan">
+<h2>خطة الصفقة المقترحة</h2>
+<div class="pill" id="tradeDirection">بانتظار إشارة واضحة</div>
+<div class="stats" style="margin-top:10px">
+<div class="stat"><span class="small muted">نقطة الدخول</span><b id="entryPrice">—</b></div>
+<div class="stat"><span class="small muted">وقف الخسارة (SL)</span><b id="tradeStop">—</b></div>
+<div class="stat"><span class="small muted">العائد/المخاطرة</span><b id="rrRatio">—</b></div>
+<div class="stat"><span class="small muted">الهدف الأول (TP1)</span><b id="tp1">—</b></div>
+<div class="stat"><span class="small muted">الهدف الثاني (TP2)</span><b id="tp2">—</b></div>
+<div class="stat"><span class="small muted">الهدف الثالث (TP3)</span><b id="tp3">—</b></div>
+</div>
+<p id="tradeReason" class="muted">ستظهر الخطة عند توفر بيانات وإشارة شراء أو بيع واضحة.</p>
+<p class="small muted">هذه مستويات تقديرية محسوبة من السعر الحالي وATR؛ قد تتغير بسرعة، وليست توصية مضمونة أو أمراً بتنفيذ صفقة.</p>
+</div>
 <div class="card">
 <h2>خطة إدارة المخاطر</h2>
 <div class="row">
@@ -153,11 +167,15 @@ function drawChart(a,lo,hi){const c=$('chart'),ctx=c.getContext('2d'),w=c.width,
 function calcRisk(){
  const bal=Math.max(0,Number($('balance').value)||0),pct=Math.min(5,Math.max(0,Number($('risk').value)||1)),cash=bal*pct/100;
  $('riskcash').textContent=fmt(cash,2)+' USDT';
- if(!latest||!latest.atr||!latest.p){$('stop').textContent='—';$('target').textContent='—';$('position').textContent='حجم المركز يُحسب بعد وصول البيانات.';return;}
- const p=latest.p, dist=latest.atr*1.5, isLong=latest.sig.includes('شراء'), isShort=latest.sig.includes('بيع');
- if(!isLong&&!isShort){$('stop').textContent='انتظار الإشارة';$('target').textContent='انتظار الإشارة';$('position').textContent='لا توجد إشارة واضحة حالياً؛ لا تدخل الصفقة اعتماداً على مستويات آلية فقط.';return;}
- const stop=isLong?p-dist:p+dist, target=isLong?p+2*dist:p-2*dist;
- $('stop').textContent=fmt(stop,p<1?6:2);$('target').textContent=fmt(target,p<1?6:2);
+ const clearPlan=(msg)=>{['entryPrice','tradeStop','tp1','tp2','tp3','rrRatio'].forEach(id=>$(id).textContent='—');$('tradeDirection').textContent='بانتظار إشارة واضحة';$('tradeDirection').className='pill gold';$('tradeReason').textContent=msg;};
+ if(!latest||!latest.atr||!latest.p){$('stop').textContent='—';$('target').textContent='—';$('position').textContent='حجم المركز يُحسب بعد وصول البيانات.';clearPlan('ستظهر الخطة عند توفر بيانات السوق.');return;}
+ const p=latest.p, dist=latest.atr*1.5, isLong=latest.sig.includes('شراء'), isShort=latest.sig.includes('بيع'), digs=p<1?6:2;
+ if(!isLong&&!isShort){$('stop').textContent='انتظار الإشارة';$('target').textContent='انتظار الإشارة';$('position').textContent='لا توجد إشارة واضحة حالياً؛ تجنّب الدخول حتى تتفق المؤشرات.';clearPlan('الإشارة الحالية انتظار؛ لن نقترح دخولاً عندما تكون المؤشرات متضاربة.');return;}
+ const sign=isLong?1:-1, stop=p-sign*dist, t1=p+sign*dist, t2=p+sign*dist*2, t3=p+sign*dist*3;
+ $('stop').textContent=fmt(stop,digs);$('target').textContent=fmt(t2,digs);
+ $('entryPrice').textContent=fmt(p,digs);$('tradeStop').textContent=fmt(stop,digs);$('tp1').textContent=fmt(t1,digs);$('tp2').textContent=fmt(t2,digs);$('tp3').textContent=fmt(t3,digs);$('rrRatio').textContent='1:1 / 1:2 / 1:3';
+ $('tradeDirection').textContent=isLong?'شراء مبدئي — LONG':'بيع مبدئي — SHORT';$('tradeDirection').className='pill '+(isLong?'up':'down');
+ $('tradeReason').textContent='سبب الإشارة: '+(isLong?'توافق المؤشرات يميل للصعود':'توافق المؤشرات يميل للهبوط')+'؛ درجة التوافق '+latest.score+'/4 وRSI '+fmt(latest.rv,1)+'. الدخول محسوب من السعر الحالي، ووقف الخسارة بمسافة 1.5×ATR.';
  const qtyRisk=dist>0?cash/dist:0, qtyBalance=p>0?bal/p:0, qty=Math.min(qtyRisk,qtyBalance), notional=qty*p, realRisk=qty*dist;
  $('position').textContent='حجم المركز الأقصى دون رافعة (مقيّد برصيدك): '+fmt(qty,6)+' وحدة؛ القيمة الاسمية: '+fmt(notional,2)+' USDT. الخسارة المقدّرة عند وقف الخسارة: '+fmt(realRisk,2)+' USDT قبل الرسوم والانزلاق.'+(qtyBalance<qtyRisk?' تم تقييد الحجم حتى لا تتجاوز قيمة المركز رصيدك.':'')+' لا ينفّذ التطبيق أي صفقة.';
 }
