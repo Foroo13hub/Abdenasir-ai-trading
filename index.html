@@ -88,11 +88,11 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:18px 0}
 <div class="card">
 <h2>قواعد قراءة الإشارة</h2>
 <ul class="list">
-<li><span class="up">صعود مبدئي</span> — السعر فوق SMA20 وSMA20 فوق SMA50 وRSI غير مرتفع بشدة.</li>
-<li><span class="down">هبوط مبدئي</span> — السعر تحت SMA20 وSMA20 تحت SMA50 وRSI غير منخفض بشدة.</li>
+<li><span class="up">شراء مبدئي</span> — توافق 3 مؤشرات أو أكثر من المتوسطات وMACD وRSI، مع RSI أقل من 70.</li>
+<li><span class="down">بيع مبدئي</span> — توافق 3 مؤشرات أو أكثر تميل للهبوط، مع RSI أعلى من 30.</li>
 <li><span class="gold">انتظار</span> — الإشارات متضاربة أو السوق في منطقة قد تكون ممتدة.</li>
 </ul>
-<p class="small muted">هذه قواعد فنية مبسطة وليست نموذج ذكاء اصطناعي ولا تضمن الربح.</p>
+<p class="small muted">الإشارة مبنية على قواعد فنية آلية وليست ذكاءً اصطناعياً تنبؤياً، ولا تضمن الربح. اختبرها قبل التداول الحقيقي.</p>
 </div>
 </section>
 <div class="notice">تنبيه مهم: الأسعار تأتي من واجهة Binance العامة وقد لا تعمل على بعض الشبكات. لا توجد مفاتيح API أو ربط حساب تداول هنا، ولا تُرسل أوامر شراء/بيع. راجع السعر والانزلاق والرسوم بنفسك قبل أي قرار.</div>
@@ -157,7 +157,7 @@ function calcRisk(){
  const stop=isLong?p-dist:p+dist, target=isLong?p+2*dist:p-2*dist;
  $('stop').textContent=fmt(stop,p<1?6:2);$('target').textContent=fmt(target,p<1?6:2);
  const qtyRisk=dist>0?cash/dist:0, qtyBalance=p>0?bal/p:0, qty=Math.min(qtyRisk,qtyBalance), notional=qty*p, realRisk=qty*dist;
- $('position').textContent='حجم المركز الأقصى دون رافعة: '+fmt(qty,6)+' وحدة؛ القيمة الاسمية: '+fmt(notional,2)+' USDT. الخسارة التقريبية عند الوقف: '+fmt(realRisk,2)+' USDT قبل الرسوم والانزلاق.'+(qtyBalance<qtyRisk?' تم تقييد الحجم حتى لا تتجاوز قيمة المركز رصيدك.':'')+' لا ينفّذ التطبيق أي صفقة.';
+ $('position').textContent='حجم المركز الأقصى دون رافعة (مقيّد برصيدك): '+fmt(qty,6)+' وحدة؛ القيمة الاسمية: '+fmt(notional,2)+' USDT. الخسارة المقدّرة عند وقف الخسارة: '+fmt(realRisk,2)+' USDT قبل الرسوم والانزلاق.'+(qtyBalance<qtyRisk?' تم تقييد الحجم حتى لا تتجاوز قيمة المركز رصيدك.':'')+' لا ينفّذ التطبيق أي صفقة.';
 }
 $('refresh').addEventListener('click',load);$('coin').addEventListener('change',load);$('interval').addEventListener('change',load);$('balance').addEventListener('input',calcRisk);$('risk').addEventListener('input',calcRisk);
 $('notify').addEventListener('click',async()=>{if(!('Notification'in window)){$('notifyStatus').textContent='هذا المتصفح لا يدعم إشعارات الويب.';return;}let p=await Notification.requestPermission();notificationEnabled=p==='granted';$('notifyStatus').textContent=notificationEnabled?'تم تفعيل الإشعارات لهذه الصفحة.':'لم يتم السماح بالإشعارات.';$('notifyStatus').className='status '+(notificationEnabled?'ok':'');});
