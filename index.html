@@ -11,7 +11,7 @@
 :root{--bg:#08111d;--panel:#101c2b;--panel2:#142337;--line:#263a51;--text:#e7eef8;--muted:#9fb0c5;--blue:#38bdf8;--green:#21c58e;--red:#ff647c;--gold:#f5bf4f}
 *{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at top,#102238 0,#08111d 42%);color:var(--text);font-family:Arial,"Noto Sans Arabic",sans-serif;padding:16px;line-height:1.65}
 .wrap{max-width:1050px;margin:auto}header{text-align:center;padding:10px 0 20px}h1{font-size:clamp(25px,5vw,38px);margin:0;color:var(--blue)}header p{color:var(--muted);margin:4px 0}
-.toolbar,.grid{display:grid;gap:12px}.toolbar{grid-template-columns:repeat(3,minmax(0,1fr));margin-bottom:14px}.grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+.toolbar,.grid{display:grid;gap:12px}.toolbar{grid-template-columns:repeat(3,minmax(0,1fr));margin-bottom:14px}.toolbar .wide{grid-column:1/-1}.grid{grid-template-columns:repeat(2,minmax(0,1fr))}
 .card{background:linear-gradient(145deg,rgba(20,35,55,.97),rgba(13,25,40,.97));border:1px solid var(--line);border-radius:16px;padding:16px;min-width:0;box-shadow:0 10px 30px #0002}
 label{display:block;color:var(--muted);font-size:13px;margin-bottom:5px}select,input,button{font:inherit;border-radius:10px;border:1px solid #354c65;padding:10px;background:#091523;color:var(--text);width:100%;min-width:0}
 button{background:#087e66;border:0;font-weight:700;cursor:pointer}button.secondary{background:#20364e}button:disabled{opacity:.6}
@@ -32,7 +32,8 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:18px 0}
 </header>
 
 <section class="toolbar card">
-<div><label for="coin">العملة</label><select id="coin"><option value="BTCUSDT">BTC — بيتكوين</option><option value="ETHUSDT">ETH — إيثيريوم</option><option value="SOLUSDT">SOL — سولانا</option><option value="SUIUSDT">SUI — سوي</option><option value="BNBUSDT">BNB — باينانس كوين</option><option value="XRPUSDT">XRP — ريبل</option><option value="DOGEUSDT">DOGE — دوجكوين</option><option value="ADAUSDT">ADA — كاردانو</option></select></div>
+<div class="wide"><label for="coinSearch">ابحث عن العملة (USDT)</label><input id="coinSearch" type="search" placeholder="اكتب الرمز مثل PEPE أو اسم العملة…" autocomplete="off"></div>
+<div><label for="coin">العملة — أعلى الأزواج تداولاً</label><select id="coin"><option value="BTCUSDT">BTC — بيتكوين</option><option value="ETHUSDT">ETH — إيثيريوم</option><option value="SOLUSDT">SOL — سولانا</option><option value="SUIUSDT">SUI — سوي</option><option value="BNBUSDT">BNB — باينانس كوين</option><option value="XRPUSDT">XRP — ريبل</option><option value="DOGEUSDT">DOGE — دوجكوين</option><option value="ADAUSDT">ADA — كاردانو</option></select><div class="small muted" id="coinCount">تحميل قائمة العملات…</div></div>
 <div><label for="interval">الإطار الزمني</label><select id="interval"><option value="5m">5 دقائق</option><option value="15m" selected>15 دقيقة</option><option value="1h">ساعة</option><option value="4h">4 ساعات</option><option value="1d">يومي</option></select></div>
 <div><label>تحديث البيانات</label><button id="refresh">تحديث الآن</button></div>
 <div class="wide"><div class="status" id="status">جاهز لجلب بيانات السوق العامة من Binance…</div></div>
@@ -126,7 +127,10 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:18px 0}
 </div>
 <script>
 const $=id=>document.getElementById(id);
-let lastSignal="", notificationEnabled=false, latest=null, timer=null;
+let lastSignal="", notificationEnabled=false, latest=null, timer=null, allUsdtCoins=[];
+const coinNames={BTC:'بيتكوين',ETH:'إيثيريوم',BNB:'باينانس كوين',SOL:'سولانا',XRP:'ريبل',DOGE:'دوجكوين',ADA:'كاردانو',TRX:'ترون',TON:'تون',LINK:'تشين لينك',AVAX:'أفالانش',SHIB:'شيبا إينو',DOT:'بولكادوت',LTC:'لايتكوين',BCH:'بيتكوين كاش',SUI:'سوي',PEPE:'بيبي',UNI:'يونيسواب',NEAR:'نير',APT:'أبتوس',ICP:'إنترنت كمبيوتر',ETC:'إيثيريوم كلاسيك',FIL:'فايل كوين',ATOM:'كوزموس',ARB:'أربيتروم',OP:'أوبتيميزم',INJ:'إنجكتيف',AAVE:'آيف',FET:'فِت',RENDER:'ريندر',WIF:'دوج ويفهات',BONK:'بونك',SEI:'سي',TIA:'سيليا',MKR:'ميكر',CRV:'كيرف',ALGO:'ألجوراند',VET:'في تشين',XLM:'ستيلر',HBAR:'هيديرا',POL:'بوليغون',ZEC:'زيكاش',XMR:'مونيرو',EOS:'إيوس',JUP:'جوبيتر',ORDI:'أوردي',ENA:'إينا',PENDLE:'بندل',ONDO:'أوندو',KAS:'كاسبا',TAO:'بيتنسور',GALA:'غالا',SAND:'ساندبوكس',MANA:'ديسنترالاند',AXS:'أكسي إنفينيتي',FLOW:'فلو',CHZ:'تشيليز',FTM:'فانتوم',IOTA:'آيوتا',QNT:'كوينت',EGLD:'إلروند',RUNE:'ثور تشين',DYDX:'داي داكس',BLUR:'بلور',STRK:'ستارك نت',JTO:'جيتو',PYTH:'بايث',ARKM:'أركام',WLD:'وورلدكوين',NOT:'نوتكوين',DOGS:'دوغز',CATI:'كاتي'};
+function coinLabel(sym){const base=sym.replace(/USDT$/,'');return base+' — '+(coinNames[base]||base);}
+async function loadCoinList(){const sel=$('coin'),search=$('coinSearch'),keep=sel.value;try{const data=await getJSON('https://api.binance.com/api/v3/ticker/24hr');allUsdtCoins=data.filter(x=>x.symbol.endsWith('USDT')&&!x.symbol.includes('_')&&Number(x.lastPrice)>0).sort((a,b)=>Number(b.quoteVolume)-Number(a.quoteVolume));const first=['BTCUSDT','ETHUSDT','SOLUSDT','SUIUSDT','BNBUSDT','XRPUSDT','DOGEUSDT','ADAUSDT'];const list=[...new Set([...first,...allUsdtCoins.map(x=>x.symbol)])];function render(filter=''){const q=filter.trim().toUpperCase();const found=list.filter(sym=>{const base=sym.replace(/USDT$/,'');return !q||sym.includes(q)||coinLabel(sym).toUpperCase().includes(q)||((coinNames[base]||'').includes(filter.trim()));});sel.innerHTML='';found.forEach(sym=>{const o=document.createElement('option');o.value=sym;o.textContent=coinLabel(sym);sel.appendChild(o)});if(found.includes(keep))sel.value=keep;else if(found.length)sel.value=found[0];$('coinCount').textContent='قائمة ديناميكية: '+allUsdtCoins.length+' زوج USDT متاح؛ ابحث بالرمز أو الاسم.';}search.addEventListener('input',()=>render(search.value));render();}catch(e){$('coinCount').textContent='تعذر تحديث القائمة؛ العملات الأساسية متاحة ويمكن المحاولة لاحقاً.';}}
 const fmt=(n,d=2)=>Number.isFinite(n)?n.toLocaleString('en-US',{minimumFractionDigits:d,maximumFractionDigits:d}):'—';
 const symbol=()=> $('coin').value;
 function setStatus(msg,kind=''){ $('status').textContent=msg; $('status').className='status '+kind; }
@@ -211,7 +215,7 @@ function calcRisk(){
 }
 $('refresh').addEventListener('click',load);$('coin').addEventListener('change',load);$('interval').addEventListener('change',load);$('balance').addEventListener('input',calcRisk);$('risk').addEventListener('input',calcRisk);
 $('notify').addEventListener('click',async()=>{if(!('Notification'in window)){$('notifyStatus').textContent='هذا المتصفح لا يدعم إشعارات الويب.';return;}let p=await Notification.requestPermission();notificationEnabled=p==='granted';$('notifyStatus').textContent=notificationEnabled?'تم تفعيل الإشعارات لهذه الصفحة.':'لم يتم السماح بالإشعارات.';$('notifyStatus').className='status '+(notificationEnabled?'ok':'');});
-load();timer=setInterval(load,60000);
+loadCoinList().then(()=>load());timer=setInterval(load,60000);
 </script>
 <script>if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));}</script>
 </body></html>
