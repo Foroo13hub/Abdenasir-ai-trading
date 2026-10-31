@@ -54,6 +54,7 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:18px 0}
 <h2>خلاصة التحليل</h2>
 <div class="signal" id="signal">جارٍ التحليل…</div>
 <p id="summary" class="muted">نحتاج بيانات شموع كافية لإظهار قراءة تقريبية.</p>
+<div class="notice" id="decisionReason" style="margin-top:10px">سبب القرار: جارٍ فحص الشروط.</div>
 <div class="stats">
 <div class="stat"><span class="small muted">RSI (14)</span><b id="rsi">—</b></div>
 <div class="stat"><span class="small muted">SMA 20</span><b id="sma20">—</b></div>
@@ -68,6 +69,7 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:18px 0}
 <div class="stat"><span class="small muted">4 ساعات</span><b id="tf4h">—</b></div>
 </div>
 <p class="muted" id="mtfSummary">سيتم فحص توافق الاتجاهات قبل تقييم فرصة التداول.</p>
+<div class="stat" style="margin:10px 0"><span class="small muted">سبب القرار الحالي</span><b id="decisionReason" style="display:block;margin-top:8px;line-height:1.7;white-space:normal">بانتظار بيانات السوق</b></div>
 <div class="stats">
 <div class="stat"><span class="small muted">قوة الإشارة التقديرية</span><b id="strength">—</b></div>
 <div class="stat"><span class="small muted">دعم قريب</span><b id="support">—</b></div>
@@ -174,7 +176,33 @@ async function load(){
   else if(bullish>=3&&t1h==='صعود'&&t4h!=='هبوط'&&!stretched){sig='صعود مبدئي';desc='ثلاثة أطر على الأقل متوافقة صعوداً، مع تأكيد الساعة وعدم تعارض 4 ساعات. الإشارة ليست ضماناً.';}
   else if(bearish>=3&&t1h==='هبوط'&&t4h!=='صعود'&&!stretched){sig='هبوط مبدئي';desc='ثلاثة أطر على الأقل متوافقة هبوطاً، مع تأكيد الساعة وعدم تعارض 4 ساعات. الإشارة ليست ضماناً.';}
   else {desc=stretched?'السعر بعيد عن متوسطه؛ تجنّب مطاردة الحركة وانتظر فرصة أوضح.':'الأطر الزمنية غير متوافقة بما يكفي؛ الأفضل الانتظار.';}
-  $('mtfSummary').textContent='الأطر: المختار '+selectedTrend+'، 15د '+t15+'، 1س '+t1h+'، 4س '+t4h+'؛ التوافق الفني ليس احتمال ربح.';
+  const decisionReasons=[];
+  if(rv>=70) decisionReasons.push('مؤشر RSI مرتفع ('+fmt(rv,1)+')؛ احتمال مطاردة زخم ممتد.');
+  else if(rv<=30) decisionReasons.push('مؤشر RSI منخفض ('+fmt(rv,1)+')؛ يلزم تأكيد قبل افتراض الارتداد.');
+  if(stretched) decisionReasons.push('السعر بعيد عن SMA 20 بمقدار يتجاوز حد الامتداد المستخدم في الفلتر.');
+  if(bullish<3&&bearish<3) decisionReasons.push('التوافق غير كافٍ: صعود '+bullish+'/4، هبوط '+bearish+'/4؛ يلزم توافق 3 أطر على الأقل.');
+  if(bullish>=3&&t1h!=='صعود') decisionReasons.push('إشارة الصعود لم تُقبل لأن إطار الساعة ليس صاعداً.');
+  if(bearish>=3&&t1h!=='هبوط') decisionReasons.push('إشارة الهبوط لم تُقبل لأن إطار الساعة ليس هابطاً.');
+  if(bullish>=3&&t4h==='هبوط') decisionReasons.push('إشارة الصعود مرفوضة لأن إطار 4 ساعات يعاكسها.');
+  if(bearish>=3&&t4h==='صعود') decisionReasons.push('إشارة الهبوط مرفوضة لأن إطار 4 ساعات يعاكسها.');
+  if(!decisionReasons.length && !sig.includes('مبدئي')) decisionReasons.push('الشروط لم تكتمل بعد؛ انتظر إغلاق شمعة جديدة ثم حدّث التحليل.');
+  if(sig.includes('صعود مبدئي')) decisionReasons.unshift('تحقق توافق صاعد في '+bullish+' من 4 قراءات، مع الساعة و4 ساعات غير معارضين.');
+  if(sig.includes('هبوط مبدئي')) decisionReasons.unshift('تحقق توافق هابط في '+bearish+' من 4 قراءات، مع الساعة و4 ساعات غير معارضين.');
+  $('decisionReason').textContent=decisionReasons.join(' ');
+  $('mtfSummary').textContent='الأطر: المختار '+selectedTrend+'، 15د '+t15+'، 1س '+t1h+'، 4س '+t4h+'؛ صعود '+bullish+'/4، هبوط '+bearish+'/4. التوافق الفني ليس احتمال ربح.';
+  const reasons=[];
+  if(rv>=70) reasons.push('RSI مرتفع ('+fmt(rv,1)+')؛ تجنّب مطاردة الشراء.');
+  else if(rv<=30) reasons.push('RSI منخفض ('+fmt(rv,1)+')؛ لا تفترض الارتداد دون تأكيد.');
+  if(stretched) reasons.push('السعر بعيد عن SMA20 بأكثر من 1.8 ATR؛ انتظر عودة أو إعادة اختبار.');
+  if(bullish<3&&bearish<3) reasons.push('لا يوجد توافق كافٍ: الصعود '+bullish+'/4 والهبوط '+bearish+'/4 أطر.');
+  if(bullish>=3&&t1h!=='صعود') reasons.push('إشارة الصعود غير مقبولة لأن إطار الساعة ليس صاعداً.');
+  if(bearish>=3&&t1h!=='هبوط') reasons.push('إشارة الهبوط غير مقبولة لأن إطار الساعة ليس هابطاً.');
+  if(bullish>=3&&t4h==='هبوط') reasons.push('إشارة الصعود مرفوضة بسبب تعارض إطار 4 ساعات.');
+  if(bearish>=3&&t4h==='صعود') reasons.push('إشارة الهبوط مرفوضة بسبب تعارض إطار 4 ساعات.');
+  if(!reasons.length&&sig==='انتظار') reasons.push('شروط الدخول لم تجتمع بعد؛ انتظر إغلاق شمعة جديدة ثم حدّث التحليل.');
+  if(sig.includes('صعود')) reasons.unshift('تم اجتياز الفلاتر الأساسية للصعود؛ هذه إشارة مبدئية وليست ضماناً.');
+  if(sig.includes('هبوط')) reasons.unshift('تم اجتياز الفلاتر الأساسية للهبوط؛ هذه إشارة مبدئية وليست ضماناً.');
+  $('decisionReason').textContent='سبب القرار الحالي: '+reasons.join(' ');
   const recentHigh=Math.max(...candles.slice(-30).map(c=>Number(c[2]))), recentLow=Math.min(...candles.slice(-30).map(c=>Number(c[3])));
   $('support').textContent=fmt(recentLow,p<1?6:2);$('resistance').textContent=fmt(recentHigh,p<1?6:2);
   const dirs=[selectedTrend,t15,t1h,t4h];const dir=sig.includes('صعود')?'صعود':sig.includes('هبوط')?'هبوط':null;const aligned=dir?dirs.filter(t=>t===dir).length:0;$('strength').textContent=(dir?Math.round(aligned/4*100):0)+'% توافق فني'+(dir?' — تقديري':' — لا توجد إشارة');
@@ -189,7 +217,7 @@ async function load(){
   setStatus('تم تحديث البيانات: '+new Date().toLocaleTimeString('ar'), 'ok');
  }catch(e){
   setStatus('تعذّر جلب البيانات. تحقق من الإنترنت أو جرّب لاحقاً. ('+e.message+')','err');
-  $('signal').textContent='البيانات غير متاحة';$('summary').textContent='قد تكون واجهة Binance محجوبة على شبكتك أو الاتصال غير مستقر.';
+  $('signal').textContent='البيانات غير متاحة';$('summary').textContent='قد تكون واجهة Binance محجوبة على شبكتك أو الاتصال غير مستقر.';$('decisionReason').textContent='سبب القرار: لم تصل بيانات كافية؛ افحص الاتصال ثم اضغط تحديث الآن.';
  }finally{$('refresh').disabled=false;}
 }
 function drawChart(a,lo,hi){const c=$('chart'),ctx=c.getContext('2d'),w=c.width,h=c.height;ctx.clearRect(0,0,w,h);ctx.strokeStyle='#24384d';ctx.lineWidth=1;for(let i=1;i<4;i++){ctx.beginPath();ctx.moveTo(0,h*i/4);ctx.lineTo(w,h*i/4);ctx.stroke();}ctx.strokeStyle='#38bdf8';ctx.lineWidth=3;ctx.beginPath();a.forEach((v,i)=>{let x=i*w/(a.length-1),y=h-12-(v-lo)/(hi-lo||1)*(h-24);i?ctx.lineTo(x,y):ctx.moveTo(x,y);});ctx.stroke();}
