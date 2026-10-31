@@ -184,7 +184,7 @@ async function load(){
   const atr=tr.slice(-14).reduce((a,b)=>a+b,0)/Math.min(14,tr.length);
   latest={p,atr,sig,rv,closes,s20,s50,int,highs,lows,t15,t1h,t4h,selectedTrend};
   calcRisk();renderTradePlan();
-  if(notificationEnabled&&lastSignal&&sig!==lastSignal&&'Notification' in window&&Notification.permission==='granted'){await sendSignalNotification('Abdenasir Crypto AI',s+' — '+sig+' على فريم '+int);}
+  if(notificationEnabled&&lastSignal&&sig!==lastSignal&&'Notification' in window&&Notification.permission==='granted'){await sendSignalNotification('Abdenasir Crypto AI',$('coin').value+' — '+sig+' على فريم '+int);}
   lastSignal=sig;
   setStatus('تم تحديث البيانات: '+new Date().toLocaleTimeString('ar'), 'ok');
  }catch(e){
