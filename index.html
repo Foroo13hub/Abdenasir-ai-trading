@@ -54,7 +54,7 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:18px 0}
 <h2>خلاصة التحليل</h2>
 <div class="signal" id="signal">جارٍ التحليل…</div>
 <p id="summary" class="muted">نحتاج بيانات شموع كافية لإظهار قراءة تقريبية.</p>
-<div class="notice" id="decisionReason" style="margin-top:10px">سبب القرار: جارٍ فحص الشروط.</div>
+<div class="notice" id="decisionNotice" style="margin-top:10px">ملخص: جارٍ فحص الشروط.</div>
 <div class="stats">
 <div class="stat"><span class="small muted">RSI (14)</span><b id="rsi">—</b></div>
 <div class="stat"><span class="small muted">SMA 20</span><b id="sma20">—</b></div>
@@ -188,7 +188,7 @@ async function load(){
   if(!decisionReasons.length && !sig.includes('مبدئي')) decisionReasons.push('الشروط لم تكتمل بعد؛ انتظر إغلاق شمعة جديدة ثم حدّث التحليل.');
   if(sig.includes('صعود مبدئي')) decisionReasons.unshift('تحقق توافق صاعد في '+bullish+' من 4 قراءات، مع الساعة و4 ساعات غير معارضين.');
   if(sig.includes('هبوط مبدئي')) decisionReasons.unshift('تحقق توافق هابط في '+bearish+' من 4 قراءات، مع الساعة و4 ساعات غير معارضين.');
-  $('decisionReason').textContent=decisionReasons.join(' ');
+  $('decisionNotice').textContent='ملخص الفلاتر: '+decisionReasons.join(' ');
   $('mtfSummary').textContent='الأطر: المختار '+selectedTrend+'، 15د '+t15+'، 1س '+t1h+'، 4س '+t4h+'؛ صعود '+bullish+'/4، هبوط '+bearish+'/4. التوافق الفني ليس احتمال ربح.';
   const reasons=[];
   if(rv>=70) reasons.push('RSI مرتفع ('+fmt(rv,1)+')؛ تجنّب مطاردة الشراء.');
@@ -205,7 +205,7 @@ async function load(){
   $('decisionReason').textContent='سبب القرار الحالي: '+reasons.join(' ');
   const recentHigh=Math.max(...candles.slice(-30).map(c=>Number(c[2]))), recentLow=Math.min(...candles.slice(-30).map(c=>Number(c[3])));
   $('support').textContent=fmt(recentLow,p<1?6:2);$('resistance').textContent=fmt(recentHigh,p<1?6:2);
-  const dirs=[selectedTrend,t15,t1h,t4h];const dir=sig.includes('صعود')?'صعود':sig.includes('هبوط')?'هبوط':null;const aligned=dir?dirs.filter(t=>t===dir).length:0;$('strength').textContent=(dir?Math.round(aligned/4*100):0)+'% توافق فني'+(dir?' — تقديري':' — لا توجد إشارة');
+  const dirs=[selectedTrend,t15,t1h,t4h];const dir=sig.includes('صعود')?'صعود':sig.includes('هبوط')?'هبوط':null;const aligned=dir?dirs.filter(t=>t===dir).length:0;$('strength').textContent=dir?Math.round(aligned/4*100)+'% توافق فني — تقديري':'لا توجد إشارة؛ لا تُحسب نسبة التوافق';
   $('signal').textContent=sig;$('signal').className='signal '+(sig.includes('صعود')?'up':sig.includes('هبوط')?'down':'gold');$('summary').textContent=desc;
   const recent=closes.slice(-60), lo=Math.min(...recent), hi=Math.max(...recent);drawChart(recent,lo,hi);
   const tr=[];for(let i=1;i<candles.length;i++){tr.push(Math.max(highs[i]-lows[i],Math.abs(highs[i]-closes[i-1]),Math.abs(lows[i]-closes[i-1])));}
@@ -217,7 +217,7 @@ async function load(){
   setStatus('تم تحديث البيانات: '+new Date().toLocaleTimeString('ar'), 'ok');
  }catch(e){
   setStatus('تعذّر جلب البيانات. تحقق من الإنترنت أو جرّب لاحقاً. ('+e.message+')','err');
-  $('signal').textContent='البيانات غير متاحة';$('summary').textContent='قد تكون واجهة Binance محجوبة على شبكتك أو الاتصال غير مستقر.';$('decisionReason').textContent='سبب القرار: لم تصل بيانات كافية؛ افحص الاتصال ثم اضغط تحديث الآن.';
+  $('signal').textContent='البيانات غير متاحة';$('summary').textContent='قد تكون واجهة Binance محجوبة على شبكتك أو الاتصال غير مستقر.';$('decisionNotice').textContent='تعذّر التحليل: لم تصل بيانات كافية؛ افحص الاتصال ثم اضغط تحديث الآن.';$('decisionReason').textContent='لا توجد قراءة موثوقة لأن بيانات السوق لم تصل.';
  }finally{$('refresh').disabled=false;}
 }
 function drawChart(a,lo,hi){const c=$('chart'),ctx=c.getContext('2d'),w=c.width,h=c.height;ctx.clearRect(0,0,w,h);ctx.strokeStyle='#24384d';ctx.lineWidth=1;for(let i=1;i<4;i++){ctx.beginPath();ctx.moveTo(0,h*i/4);ctx.lineTo(w,h*i/4);ctx.stroke();}ctx.strokeStyle='#38bdf8';ctx.lineWidth=3;ctx.beginPath();a.forEach((v,i)=>{let x=i*w/(a.length-1),y=h-12-(v-lo)/(hi-lo||1)*(h-24);i?ctx.lineTo(x,y):ctx.moveTo(x,y);});ctx.stroke();}
