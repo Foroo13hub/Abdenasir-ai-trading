@@ -33,7 +33,7 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:18px 0}
 
 <section class="toolbar card">
 <div class="wide"><label for="coinSearch">ابحث عن العملة (USDT)</label><input id="coinSearch" type="search" placeholder="اكتب الرمز مثل PEPE أو اسم العملة…" autocomplete="off"></div>
-<div><label for="coin">العملة — أعلى الأزواج تداولاً</label><select id="coin"><option value="BTCUSDT">BTC — بيتكوين</option><option value="ETHUSDT">ETH — إيثيريوم</option><option value="SOLUSDT">SOL — سولانا</option><option value="SUIUSDT">SUI — سوي</option><option value="BNBUSDT">BNB — باينانس كوين</option><option value="XRPUSDT">XRP — ريبل</option><option value="DOGEUSDT">DOGE — دوجكوين</option><option value="ADAUSDT">ADA — كاردانو</option></select><div class="small muted" id="coinCount">تحميل قائمة العملات…</div></div>
+<div><label for="coin">العملة — أعلى الأزواج تداولاً</label><select id="coin"><option value="BTCUSDT">BTC — بيتكوين</option><option value="ETHUSDT">ETH — إيثيريوم</option><option value="SOLUSDT">SOL — سولانا</option><option value="SUIUSDT">SUI — سوي</option><option value="BNBUSDT">BNB — باينانس كوين</option><option value="XRPUSDT">XRP — ريبل</option><option value="DOGEUSDT">DOGE — دوجكوين</option><option value="ADAUSDT">ADA — كاردانو</option></select><div class="small muted" id="coinCount">تحميل جميع أزواج Binance/USDT…</div></div>
 <div><label for="interval">الإطار الزمني</label><select id="interval"><option value="5m">5 دقائق</option><option value="15m" selected>15 دقيقة</option><option value="1h">ساعة</option><option value="4h">4 ساعات</option><option value="1d">يومي</option></select></div>
 <div><label>تحديث البيانات</label><button id="refresh">تحديث الآن</button></div>
 <div class="wide"><div class="status" id="status">جاهز لجلب بيانات السوق العامة من Binance…</div></div>
@@ -127,10 +127,10 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:18px 0}
 </div>
 <script>
 const $=id=>document.getElementById(id);
-let lastSignal="", notificationEnabled=false, latest=null, timer=null, allUsdtCoins=[];
+let lastSignal="", notificationEnabled=false, latest=null, timer=null, allUsdtCoins=[], notificationRegistration=null;
 const coinNames={BTC:'بيتكوين',ETH:'إيثيريوم',BNB:'باينانس كوين',SOL:'سولانا',XRP:'ريبل',DOGE:'دوجكوين',ADA:'كاردانو',TRX:'ترون',TON:'تون',LINK:'تشين لينك',AVAX:'أفالانش',SHIB:'شيبا إينو',DOT:'بولكادوت',LTC:'لايتكوين',BCH:'بيتكوين كاش',SUI:'سوي',PEPE:'بيبي',UNI:'يونيسواب',NEAR:'نير',APT:'أبتوس',ICP:'إنترنت كمبيوتر',ETC:'إيثيريوم كلاسيك',FIL:'فايل كوين',ATOM:'كوزموس',ARB:'أربيتروم',OP:'أوبتيميزم',INJ:'إنجكتيف',AAVE:'آيف',FET:'فِت',RENDER:'ريندر',WIF:'دوج ويفهات',BONK:'بونك',SEI:'سي',TIA:'سيليا',MKR:'ميكر',CRV:'كيرف',ALGO:'ألجوراند',VET:'في تشين',XLM:'ستيلر',HBAR:'هيديرا',POL:'بوليغون',ZEC:'زيكاش',XMR:'مونيرو',EOS:'إيوس',JUP:'جوبيتر',ORDI:'أوردي',ENA:'إينا',PENDLE:'بندل',ONDO:'أوندو',KAS:'كاسبا',TAO:'بيتنسور',GALA:'غالا',SAND:'ساندبوكس',MANA:'ديسنترالاند',AXS:'أكسي إنفينيتي',FLOW:'فلو',CHZ:'تشيليز',FTM:'فانتوم',IOTA:'آيوتا',QNT:'كوينت',EGLD:'إلروند',RUNE:'ثور تشين',DYDX:'داي داكس',BLUR:'بلور',STRK:'ستارك نت',JTO:'جيتو',PYTH:'بايث',ARKM:'أركام',WLD:'وورلدكوين',NOT:'نوتكوين',DOGS:'دوغز',CATI:'كاتي'};
 function coinLabel(sym){const base=sym.replace(/USDT$/,'');return base+' — '+(coinNames[base]||base);}
-async function loadCoinList(){const sel=$('coin'),search=$('coinSearch'),keep=sel.value;try{const data=await getJSON('https://api.binance.com/api/v3/ticker/24hr');allUsdtCoins=data.filter(x=>x.symbol.endsWith('USDT')&&!x.symbol.includes('_')&&Number(x.lastPrice)>0).sort((a,b)=>Number(b.quoteVolume)-Number(a.quoteVolume));const first=['BTCUSDT','ETHUSDT','SOLUSDT','SUIUSDT','BNBUSDT','XRPUSDT','DOGEUSDT','ADAUSDT'];const list=[...new Set([...first,...allUsdtCoins.map(x=>x.symbol)])];function render(filter=''){const q=filter.trim().toUpperCase();const found=list.filter(sym=>{const base=sym.replace(/USDT$/,'');return !q||sym.includes(q)||coinLabel(sym).toUpperCase().includes(q)||((coinNames[base]||'').includes(filter.trim()));});sel.innerHTML='';found.forEach(sym=>{const o=document.createElement('option');o.value=sym;o.textContent=coinLabel(sym);sel.appendChild(o)});if(found.includes(keep))sel.value=keep;else if(found.length)sel.value=found[0];$('coinCount').textContent='قائمة ديناميكية: '+allUsdtCoins.length+' زوج USDT متاح؛ ابحث بالرمز أو الاسم.';}search.addEventListener('input',()=>render(search.value));render();}catch(e){$('coinCount').textContent='تعذر تحديث القائمة؛ العملات الأساسية متاحة ويمكن المحاولة لاحقاً.';}}
+async function loadCoinList(){const sel=$('coin'),search=$('coinSearch'),keep=sel.value;try{const data=await getJSON('https://api.binance.com/api/v3/ticker/24hr');allUsdtCoins=data.filter(x=>x.symbol.endsWith('USDT')&&!x.symbol.includes('_')&&Number(x.lastPrice)>0).sort((a,b)=>Number(b.quoteVolume)-Number(a.quoteVolume));const first=['BTCUSDT','ETHUSDT','SOLUSDT','SUIUSDT','BNBUSDT','XRPUSDT','DOGEUSDT','ADAUSDT'];const list=[...new Set([...first,...allUsdtCoins.map(x=>x.symbol)])];function render(filter=''){const q=filter.trim().toUpperCase();const found=list.filter(sym=>{const base=sym.replace(/USDT$/,'');return !q||sym.includes(q)||coinLabel(sym).toUpperCase().includes(q)||((coinNames[base]||'').includes(filter.trim()));});sel.innerHTML='';found.forEach(sym=>{const o=document.createElement('option');o.value=sym;o.textContent=coinLabel(sym);sel.appendChild(o)});if(found.includes(keep))sel.value=keep;else if(found.length)sel.value=found[0];$('coinCount').textContent='قائمة ديناميكية: '+allUsdtCoins.length+' زوج تداول USDT نشط متاح في Binance؛ ابحث بالرمز أو الاسم.';}search.addEventListener('input',()=>render(search.value));render();}catch(e){$('coinCount').textContent='تعذر تحديث القائمة؛ العملات الأساسية متاحة ويمكن المحاولة لاحقاً.';}}
 const fmt=(n,d=2)=>Number.isFinite(n)?n.toLocaleString('en-US',{minimumFractionDigits:d,maximumFractionDigits:d}):'—';
 const symbol=()=> $('coin').value;
 function setStatus(msg,kind=''){ $('status').textContent=msg; $('status').className='status '+kind; }
@@ -162,22 +162,25 @@ async function load(){
   $('tf15').textContent=t15;$('tf1h').textContent=t1h;$('tf4h').textContent=t4h;
   $('tf15').className=t15==='صعود'?'up':t15==='هبوط'?'down':'gold';$('tf1h').className=t1h==='صعود'?'up':t1h==='هبوط'?'down':'gold';$('tf4h').className=t4h==='صعود'?'up':t4h==='هبوط'?'down':'gold';
   let sig='انتظار', desc='الاتجاه غير واضح بما يكفي؛ الأفضل عدم الاستعجال.';
-  if(selectedTrend==='صعود'&&t1h==='صعود'&&t4h!=='هبوط'){sig='صعود مبدئي';desc='اتجاه الإطار المختار والساعة متوافقان صعوداً، ولا يوجد تعارض هابط على 4 ساعات. انتظر تأكيد حركة السعر.';}
-  else if(selectedTrend==='هبوط'&&t1h==='هبوط'&&t4h!=='صعود'){sig='هبوط مبدئي';desc='اتجاه الإطار المختار والساعة متوافقان هبوطاً، ولا يوجد تعارض صاعد على 4 ساعات. انتظر تأكيد حركة السعر.';}
-  else if(rv>=70){sig='انتظار — RSI مرتفع';desc='الزخم مرتفع وقد يكون السعر ممتداً؛ لا تطارد الحركة.';}
+  const bullish=[selectedTrend,t15,t1h,t4h].filter(t=>t==='صعود').length;
+  const bearish=[selectedTrend,t15,t1h,t4h].filter(t=>t==='هبوط').length;
+  const stretched=Math.abs(closes[closes.length-1]-s20)>1.8*(highs.slice(-14).reduce((a,v,i)=>a+Math.max(0,v-lows.slice(-14)[i]),0)/14);
+  if(rv>=70){sig='انتظار — RSI مرتفع';desc='الزخم مرتفع؛ لا تطارد الحركة.';}
   else if(rv<=30){sig='انتظار — RSI منخفض';desc='الزخم منخفض؛ لا تفترض الارتداد دون تأكيد.';}
-  else {desc='الأطر الزمنية غير متوافقة بما يكفي؛ الأفضل الانتظار وعدم فرض صفقة.';}
-  $('mtfSummary').textContent='الإطار المختار: '+selectedTrend+'؛ توافق 15د/1س/4س يُستخدم كفلتر، وليس ضماناً.';
+  else if(bullish>=3&&t1h==='صعود'&&t4h!=='هبوط'&&!stretched){sig='صعود مبدئي';desc='ثلاثة أطر على الأقل متوافقة صعوداً، مع تأكيد الساعة وعدم تعارض 4 ساعات. الإشارة ليست ضماناً.';}
+  else if(bearish>=3&&t1h==='هبوط'&&t4h!=='صعود'&&!stretched){sig='هبوط مبدئي';desc='ثلاثة أطر على الأقل متوافقة هبوطاً، مع تأكيد الساعة وعدم تعارض 4 ساعات. الإشارة ليست ضماناً.';}
+  else {desc=stretched?'السعر بعيد عن متوسطه؛ تجنّب مطاردة الحركة وانتظر فرصة أوضح.':'الأطر الزمنية غير متوافقة بما يكفي؛ الأفضل الانتظار.';}
+  $('mtfSummary').textContent='الأطر: المختار '+selectedTrend+'، 15د '+t15+'، 1س '+t1h+'، 4س '+t4h+'؛ التوافق الفني ليس احتمال ربح.';
   const recentHigh=Math.max(...candles.slice(-30).map(c=>Number(c[2]))), recentLow=Math.min(...candles.slice(-30).map(c=>Number(c[3])));
   $('support').textContent=fmt(recentLow,p<1?6:2);$('resistance').textContent=fmt(recentHigh,p<1?6:2);
-  const aligned=(t15===t1h?1:0)+(t1h===t4h?1:0)+(selectedTrend===t1h?1:0);$('strength').textContent=Math.round(aligned/3*100)+'% (تقديري)';
+  const dirs=[selectedTrend,t15,t1h,t4h];const dir=dirs.filter(t=>t==='صعود').length>=3?'صعود':dirs.filter(t=>t==='هبوط').length>=3?'هبوط':null;const aligned=dir?dirs.filter(t=>t===dir).length:0;$('strength').textContent=(dir?Math.round(aligned/4*100):0)+'% توافق فني';
   $('signal').textContent=sig;$('signal').className='signal '+(sig.includes('صعود')?'up':sig.includes('هبوط')?'down':'gold');$('summary').textContent=desc;
   const recent=closes.slice(-60), lo=Math.min(...recent), hi=Math.max(...recent);drawChart(recent,lo,hi);
   const tr=[];for(let i=1;i<candles.length;i++){tr.push(Math.max(highs[i]-lows[i],Math.abs(highs[i]-closes[i-1]),Math.abs(lows[i]-closes[i-1])));}
   const atr=tr.slice(-14).reduce((a,b)=>a+b,0)/Math.min(14,tr.length);
   latest={p,atr,sig,rv,closes,s20,s50,int,highs,lows,t15,t1h,t4h,selectedTrend};
   calcRisk();renderTradePlan();
-  if(notificationEnabled&&lastSignal&&sig!==lastSignal&&Notification.permission==='granted'){new Notification('Abdenasir Crypto AI',{body:s+' — '+sig+' على فريم '+int});}
+  if(notificationEnabled&&lastSignal&&sig!==lastSignal&&'Notification' in window&&Notification.permission==='granted'){await sendSignalNotification('Abdenasir Crypto AI',s+' — '+sig+' على فريم '+int);}
   lastSignal=sig;
   setStatus('تم تحديث البيانات: '+new Date().toLocaleTimeString('ar'), 'ok');
  }catch(e){
@@ -210,11 +213,12 @@ function calcRisk(){
  const dist=Math.max(latest.atr*1.5,latest.p*0.0015), isLong=latest.sig.includes('صعود'),isShort=latest.sig.includes('هبوط');
  $('stop').textContent=fmt(isLong?latest.p-dist:isShort?latest.p+dist:NaN,latest.p<1?6:2);
  $('target').textContent=fmt(isLong?latest.p+dist*2:isShort?latest.p-dist*2:NaN,latest.p<1?6:2);
- const qty=dist>0?cash/dist:0;
+ const rawQty=dist>0?cash/dist:0;const qty=bal>0?Math.min(rawQty,bal/latest.p):0;
  $('position').textContent='حجم تقريبي وفق مسافة الوقف: '+fmt(qty,6)+' وحدة؛ القيمة الاسمية نحو '+fmt(qty*latest.p,2)+' USDT. هذا تقدير حسابي فقط ولا يشمل الرسوم أو الرافعة.';
 }
 $('refresh').addEventListener('click',load);$('coin').addEventListener('change',load);$('interval').addEventListener('change',load);$('balance').addEventListener('input',calcRisk);$('risk').addEventListener('input',calcRisk);
-$('notify').addEventListener('click',async()=>{if(!('Notification'in window)){$('notifyStatus').textContent='هذا المتصفح لا يدعم إشعارات الويب.';return;}let p=await Notification.requestPermission();notificationEnabled=p==='granted';$('notifyStatus').textContent=notificationEnabled?'تم تفعيل الإشعارات لهذه الصفحة.':'لم يتم السماح بالإشعارات.';$('notifyStatus').className='status '+(notificationEnabled?'ok':'');});
+async function sendSignalNotification(title,body){try{if(!('Notification' in window)||Notification.permission!=='granted')return false;if('serviceWorker' in navigator){const reg=notificationRegistration||await navigator.serviceWorker.ready;if(reg&&typeof reg.showNotification==='function'){await reg.showNotification(title,{body,icon:'./icon.svg',tag:'abdenasir-signal',renotify:true});return true;}}$('notifyStatus').textContent='المتصفح لا يدعم إشعارات الخلفية؛ افتح التطبيق من رابط HTTPS وثبّته على الشاشة الرئيسية.';return false;}catch(err){$('notifyStatus').textContent='تعذّر إرسال الإشعار. افتح التطبيق من رابط HTTPS في Chrome واسمح بالإشعارات.';return false;}}
+$('notify').addEventListener('click',async()=>{if(!('Notification'in window)){$('notifyStatus').textContent='هذا المتصفح لا يدعم إشعارات الويب.';return;}if(!('serviceWorker' in navigator)||!/^https?:$/.test(location.protocol)||location.protocol!=='https:'){$('notifyStatus').textContent='الإشعارات تحتاج فتح التطبيق من رابط HTTPS، وليس من ملف محلي.';$('notifyStatus').className='status err';return;}try{let p=await Notification.requestPermission();notificationEnabled=p==='granted';if(notificationEnabled){notificationRegistration=await navigator.serviceWorker.ready;await sendSignalNotification('Abdenasir Crypto AI','تم تفعيل الإشعارات بنجاح.');}$('notifyStatus').textContent=notificationEnabled?'تم تفعيل الإشعارات. ستصلك تنبيهات عند تغيّر الإشارة أثناء عمل التطبيق.':'لم يتم السماح بالإشعارات.';$('notifyStatus').className='status '+(notificationEnabled?'ok':'err');}catch(err){notificationEnabled=false;$('notifyStatus').textContent='تعذّر تفعيل الإشعارات؛ تأكد من HTTPS وإذن الإشعارات.';$('notifyStatus').className='status err';}});
 loadCoinList().then(()=>load());timer=setInterval(load,60000);
 </script>
 <script>if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));}</script>
