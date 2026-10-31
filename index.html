@@ -141,13 +141,17 @@ async function load(){
  $('refresh').disabled=true;setStatus('جارٍ تحميل بيانات السوق…');
  try{
   const s=symbol(), int=$('interval').value;
-  const [ticker, candles, c15, c1h, c4h]=await Promise.all([
+  const [ticker, rawCandles, raw15, raw1h, raw4h]=await Promise.all([
    getJSON('https://api.binance.com/api/v3/ticker/24hr?symbol='+s),
    getJSON('https://api.binance.com/api/v3/klines?symbol='+s+'&interval='+int+'&limit=100'),
    getJSON('https://api.binance.com/api/v3/klines?symbol='+s+'&interval=15m&limit=100'),
    getJSON('https://api.binance.com/api/v3/klines?symbol='+s+'&interval=1h&limit=100'),
    getJSON('https://api.binance.com/api/v3/klines?symbol='+s+'&interval=4h&limit=100')
   ]);
+  // Binance includes the currently forming candle; indicators use closed candles only.
+  const closedOnly=a=>a.length>1&&Number(a[a.length-1][6])>Date.now()?a.slice(0,-1):a;
+  const candles=closedOnly(rawCandles), c15=closedOnly(raw15), c1h=closedOnly(raw1h), c4h=closedOnly(raw4h);
+  if(candles.length<55||c15.length<55||c1h.length<55||c4h.length<55)throw new Error('بيانات الشموع المغلقة غير كافية');
   const closes=candles.map(c=>Number(c[4])), highs=candles.map(c=>Number(c[2])), lows=candles.map(c=>Number(c[3]));
   const p=Number(ticker.lastPrice), ch=Number(ticker.priceChangePercent), s20=sma(closes,20), s50=sma(closes,50), rv=rsi(closes);
   $('price').textContent=fmt(p, p<1?6:2)+' USDT';
@@ -173,7 +177,7 @@ async function load(){
   $('mtfSummary').textContent='الأطر: المختار '+selectedTrend+'، 15د '+t15+'، 1س '+t1h+'، 4س '+t4h+'؛ التوافق الفني ليس احتمال ربح.';
   const recentHigh=Math.max(...candles.slice(-30).map(c=>Number(c[2]))), recentLow=Math.min(...candles.slice(-30).map(c=>Number(c[3])));
   $('support').textContent=fmt(recentLow,p<1?6:2);$('resistance').textContent=fmt(recentHigh,p<1?6:2);
-  const dirs=[selectedTrend,t15,t1h,t4h];const dir=dirs.filter(t=>t==='صعود').length>=3?'صعود':dirs.filter(t=>t==='هبوط').length>=3?'هبوط':null;const aligned=dir?dirs.filter(t=>t===dir).length:0;$('strength').textContent=(dir?Math.round(aligned/4*100):0)+'% توافق فني';
+  const dirs=[selectedTrend,t15,t1h,t4h];const dir=sig.includes('صعود')?'صعود':sig.includes('هبوط')?'هبوط':null;const aligned=dir?dirs.filter(t=>t===dir).length:0;$('strength').textContent=(dir?Math.round(aligned/4*100):0)+'% توافق فني'+(dir?' — تقديري':' — لا توجد إشارة');
   $('signal').textContent=sig;$('signal').className='signal '+(sig.includes('صعود')?'up':sig.includes('هبوط')?'down':'gold');$('summary').textContent=desc;
   const recent=closes.slice(-60), lo=Math.min(...recent), hi=Math.max(...recent);drawChart(recent,lo,hi);
   const tr=[];for(let i=1;i<candles.length;i++){tr.push(Math.max(highs[i]-lows[i],Math.abs(highs[i]-closes[i-1]),Math.abs(lows[i]-closes[i-1])));}
@@ -207,14 +211,15 @@ function renderTradePlan(){
  quality.textContent='الفلتر متعدد الأطر متوافق جزئياً؛ الاتجاه مبدئي وليس تأكيداً مستقلاً. لا توجد بيانات دفتر أوامر أو أخبار ضمن هذا النموذج. لا تدخل إذا تعارضت الأطر أو كان السعر بعيداً عن مستوى منطقي.';
 }
 function calcRisk(){
- const bal=Math.max(0,Number($('balance').value)||0),pct=Math.max(0,Number($('risk').value)||0),cash=bal*pct/100;
+ const bal=Math.max(0,Number($('balance').value)||0),pct=Math.min(5,Math.max(0,Number($('risk').value)||0)),cash=bal*pct/100; $('risk').value=String(pct);
  $('riskcash').textContent=fmt(cash,2)+' USDT';
  if(!latest||!latest.atr||!latest.p){$('stop').textContent='—';$('target').textContent='—';$('position').textContent='حجم المركز يُحسب بعد وصول البيانات.';return;}
  const dist=Math.max(latest.atr*1.5,latest.p*0.0015), isLong=latest.sig.includes('صعود'),isShort=latest.sig.includes('هبوط');
  $('stop').textContent=fmt(isLong?latest.p-dist:isShort?latest.p+dist:NaN,latest.p<1?6:2);
  $('target').textContent=fmt(isLong?latest.p+dist*2:isShort?latest.p-dist*2:NaN,latest.p<1?6:2);
+ if(!isLong&&!isShort){$('position').textContent='انتظار: لا يُقترح حجم مركز قبل ظهور إشارة اتجاهية.';return;}
  const rawQty=dist>0?cash/dist:0;const qty=bal>0?Math.min(rawQty,bal/latest.p):0;
- $('position').textContent='حجم تقريبي وفق مسافة الوقف: '+fmt(qty,6)+' وحدة؛ القيمة الاسمية نحو '+fmt(qty*latest.p,2)+' USDT. هذا تقدير حسابي فقط ولا يشمل الرسوم أو الرافعة.';
+ $('position').textContent='حجم تقريبي وفق مسافة الوقف: '+fmt(qty,6)+' وحدة؛ القيمة الاسمية نحو '+fmt(qty*latest.p,2)+' USDT. تقدير فقط، دون رسوم أو انزلاق؛ الرافعة غير محسوبة.';
 }
 $('refresh').addEventListener('click',load);$('coin').addEventListener('change',load);$('interval').addEventListener('change',load);$('balance').addEventListener('input',calcRisk);$('risk').addEventListener('input',calcRisk);
 async function sendSignalNotification(title,body){try{if(!('Notification' in window)||Notification.permission!=='granted')return false;if('serviceWorker' in navigator){const reg=notificationRegistration||await navigator.serviceWorker.ready;if(reg&&typeof reg.showNotification==='function'){await reg.showNotification(title,{body,icon:'./icon.svg',tag:'abdenasir-signal',renotify:true});return true;}}$('notifyStatus').textContent='المتصفح لا يدعم إشعارات الخلفية؛ افتح التطبيق من رابط HTTPS وثبّته على الشاشة الرئيسية.';return false;}catch(err){$('notifyStatus').textContent='تعذّر إرسال الإشعار. افتح التطبيق من رابط HTTPS في Chrome واسمح بالإشعارات.';return false;}}
